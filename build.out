@@ -1,0 +1,134 @@
+Clean Kernel
+Make Kernel Configuration
+make -j9
+
+scripts/kconfig/conf --silentoldconfig Kconfig
+  CHK     include/linux/version.h
+  CHK     include/generated/utsrelease.h
+make[1]: `include/generated/mach-types.h' is up to date.
+  CALL    scripts/checksyscalls.sh
+  CHK     include/generated/compile.h
+  CC      init/do_mounts.o
+  CC      kernel/sysctl.o
+  CC      fs/lockd/clntlock.o
+  CC      fs/lockd/clntproc.o
+  CC      fs/lockd/clntxdr.o
+  CC      fs/nfs/client.o
+  LD      init/mounts.o
+  CC      net/sunrpc/clnt.o
+  LD      init/built-in.o
+  CC      fs/nfs/dir.o
+  CC      fs/nfs/file.o
+  CC      net/sunrpc/xprt.o
+  CC      fs/lockd/host.o
+  LD      kernel/built-in.o
+  CC      fs/nfs/getroot.o
+  CC      fs/lockd/svc.o
+  CC      fs/lockd/svclock.o
+  CC      net/sunrpc/xprtsock.o
+  CC      net/sunrpc/sched.o
+  CC      fs/lockd/svcshare.o
+  CC      fs/lockd/svcproc.o
+  CC      fs/nfs/inode.o
+  CC      fs/nfs/super.o
+  CC      fs/nfs/nfs2xdr.o
+  CC      fs/lockd/svcsubs.o
+  CC      net/sunrpc/auth.o
+  CC      net/sunrpc/auth_null.o
+  CC      net/sunrpc/auth_unix.o
+  CC      fs/lockd/mon.o
+  CC      fs/nfs/direct.o
+  CC      fs/nfs/pagelist.o
+  CC      net/sunrpc/auth_generic.o
+  CC      net/sunrpc/svc.o
+  CC      fs/lockd/xdr.o
+  CC      net/sunrpc/svcsock.o
+  CC      fs/nfs/proc.o
+  CC      net/sunrpc/svcauth.o
+  CC      fs/lockd/clnt4xdr.o
+  CC      fs/nfs/read.o
+  CC      net/sunrpc/svcauth_unix.o
+  CC      fs/lockd/xdr4.o
+  CC      net/sunrpc/addr.o
+  CC      net/sunrpc/rpcb_clnt.o
+  CC      fs/lockd/svc4proc.o
+  CC      fs/nfs/symlink.o
+  CC      fs/nfs/unlink.o
+  CC      fs/nfs/write.o
+  CC      fs/nfs/namespace.o
+  CC      fs/nfs/mount_clnt.o
+  CC      fs/nfs/dns_resolve.o
+  CC      net/sunrpc/timer.o
+  CC      fs/nfs/nfs3proc.o
+  CC      net/sunrpc/sunrpc_syms.o
+  LD      fs/lockd/lockd.o
+  LD      fs/lockd/built-in.o
+  CC      fs/nfs/nfs3xdr.o
+  CC      fs/nfs/nfs3acl.o
+  CC      net/sunrpc/rpc_pipe.o
+  CC      net/sunrpc/svc_xprt.o
+  CC      net/sunrpc/backchannel_rqst.o
+  CC      fs/nfs/nfs4proc.o
+  CC      net/sunrpc/bc_svc.o
+  CC      fs/nfs/nfs4xdr.o
+  CC      fs/nfs/nfs4state.o
+  CC      net/sunrpc/stats.o
+  CC      fs/nfs/nfs4renewd.o
+  CC      net/sunrpc/sysctl.o
+  CC      fs/nfs/delegation.o
+  CC      fs/nfs/idmap.o
+  CC      fs/nfs/callback.o
+  CC      fs/nfs/callback_xdr.o
+  CC      net/sunrpc/auth_gss/auth_gss.o
+  LD      net/sunrpc/sunrpc.o
+  CC      net/sunrpc/auth_gss/gss_mech_switch.o
+  CC      fs/nfs/callback_proc.o
+  CC      net/sunrpc/auth_gss/svcauth_gss.o
+  CC      fs/nfs/nfs4namespace.o
+  CC      fs/nfs/pnfs.o
+  CC      fs/nfs/pnfs_dev.o
+  CC      fs/nfs/sysctl.o
+  CC      fs/nfs/nfs4filelayout.o
+  CC      fs/nfs/nfs4filelayoutdev.o
+  LD      net/sunrpc/auth_gss/auth_rpcgss.o
+  LD      net/sunrpc/auth_gss/built-in.o
+  LD      net/sunrpc/built-in.o
+  LD      net/built-in.o
+  LD      fs/nfs/nfs.o
+  LD      fs/nfs/nfs_layout_nfsv41_files.o
+  LD      fs/nfs/built-in.o
+  LD      fs/built-in.o
+  LD      vmlinux.o
+  MODPOST vmlinux.o
+WARNING: modpost: Found 3 section mismatch(es).
+To see full details build your kernel with:
+'make CONFIG_DEBUG_SECTION_MISMATCH=y'
+  GEN     .version
+  CHK     include/generated/compile.h
+  UPD     include/generated/compile.h
+  CC      init/version.o
+  LD      init/built-in.o
+  LD      .tmp_vmlinux1
+  KSYM    .tmp_kallsyms1.S
+  AS      .tmp_kallsyms1.o
+  LD      .tmp_vmlinux2
+  KSYM    .tmp_kallsyms2.S
+  AS      .tmp_kallsyms2.o
+  LD      vmlinux
+  SYSMAP  System.map
+  SYSMAP  .tmp_System.map
+  OBJCOPY arch/arm/boot/Image
+  Building modules, stage 2.
+  MODPOST 2 modules
+  Kernel: arch/arm/boot/Image is ready
+  GZIP    arch/arm/boot/compressed/piggy.gzip
+  SHIPPED arch/arm/boot/compressed/lib1funcs.S
+  AS      arch/arm/boot/compressed/lib1funcs.o
+  AS      arch/arm/boot/compressed/piggy.gzip.o
+  LD      arch/arm/boot/compressed/vmlinux
+  OBJCOPY arch/arm/boot/zImage
+  Kernel: arch/arm/boot/zImage is ready
+Copy Kernel Image to Image Folder
+Copy Kernel Image to Install Directory
+cp: cannot create regular file `/home/chongzi/m210_ics404_120703/fastboot_image_ICS/zImage': Permission denied
+Total compile time is 0 minutes 18 seconds

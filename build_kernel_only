@@ -1,0 +1,41 @@
+#!/bin/sh
+
+export ARCH=arm
+export CROSS_COMPILE=arm-none-linux-gnueabi-
+export PATH=$PATH:/opt/arm-2009q3/bin
+
+INSTALL_BINDIR=/home/yhoh/fastboot_image_ICS
+INSTALL_BINDIR_2=/home/image/yhoh
+KERNEL_IMAGE=zImage
+ 
+{
+CPU_JOB_NUM=$(grep processor /proc/cpuinfo | awk '{field=$NF};END{print field+2}')
+START_TIME=`date +%s`
+
+mkdir -p ../image
+rm -rf ../image/$KERNEL_IMAGE
+
+echo make -j$CPU_JOB_NUM
+echo
+make -j$CPU_JOB_NUM
+if [ $? != 0 ] ; then
+	exit $?
+fi
+
+echo Copy Kernel Image to Image Folder
+cp -a arch/arm/boot/$KERNEL_IMAGE ../image/
+
+if [ $INSTALL_BINDIR ]
+then
+echo Copy Kernel Image to Install Directory
+cp -f arch/arm/boot/$KERNEL_IMAGE $INSTALL_BINDIR/$KERNEL_IMAGE
+fi
+if [ $INSTALL_BINDIR_2 ]
+then
+echo Copy Kernel Image to Install Directory 2
+cp -f arch/arm/boot/$KERNEL_IMAGE $INSTALL_BINDIR_2/$KERNEL_IMAGE
+fi
+
+END_TIME=`date +%s`
+echo "Total compile time is $((($END_TIME-$START_TIME)/60)) minutes $((($END_TIME-$START_TIME)%60)) seconds"
+} 2>&1 | tee build.out

@@ -1,0 +1,24 @@
+#ifndef __GPIO_SMDKC110_H_
+#define __GPIO_SMDKC110_H_
+
+
+#define GPIO_PS_VOUT			S5PV210_GPJ4(2)
+#define GPIO_PS_VOUT_AF			0xFF
+
+#define GPIO_BUCK_1_EN_A		S5PV210_GPJ4(3)
+#define GPIO_BUCK_1_EN_B		S5PV210_GPJ4(3)
+
+#define GPIO_BUCK_2_EN			S5PV210_GPJ4(2)
+
+#define GPIO_nPOWER			S5PV210_GPJ4(1)
+
+#define GPIO_EAR_SEND_END		S5PV210_GPJ4(1)
+#define GPIO_EAR_SEND_END_AF		0xFF
+
+#define GPIO_PS_ON			S5PV210_GPJ4(4)
+
+#define GPIO_MICBIAS_EN			S5PV210_GPJ4(2)
+
+#endif
+/* end of __GPIO_SMDKC110_H_ */
+

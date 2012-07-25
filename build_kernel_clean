@@ -1,0 +1,20 @@
+#!/bin/sh
+
+export ARCH=arm
+export CROSS_COMPILE=arm-none-linux-gnueabi-
+export PATH=$PATH:/opt/arm-2009q3/bin
+
+echo Clean Kernel
+make mrproper
+
+# Delete unnecessary files
+echo "Delete unnecessary files ..."
+rm -rf ./security/selinux/av_permissions.h
+rm -rf build.out
+
+# Delete all object files
+echo "Delete all object (*.o, *.o.cmd) files ..."
+find ./ -name *.o -exec rm -f {} \;
+find ./ -name *.o.cmd -exec rm -f {} \;
+find ./ -name .gitignore -exec rm -f {} \;
+
