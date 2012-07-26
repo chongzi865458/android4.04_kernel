@@ -15,7 +15,9 @@
 
 #include <plat/map-base.h>
 #include <plat/map-s5p.h>
-
+//#define S5PV210_PA_DM9000       (0xA8000000) jhk add dm9000
+#define S5PV210_PA_DM9000	(0x88000300)
+#define S5P_PA_DM9000           S5PV210_PA_DM9000
 #if defined(CONFIG_MACH_SMDKV210) || defined(CONFIG_MACH_MANGO210)
 #define S5PV210_PA_SDRAM		0x20000000
 #else

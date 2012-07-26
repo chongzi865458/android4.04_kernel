@@ -11,6 +11,7 @@
 */
 
 #include <linux/gpio.h>
+#include <linux/dm9000.h>
 #include <linux/platform_device.h>
 
 #include <mach/irqs.h>
@@ -22,6 +23,68 @@
 #include <plat/media.h>
 #include <plat/jpeg.h>
 #include <mach/media.h>
+/* DM9000 registrations */
+#ifdef CONFIG_DM9000
+static struct resource s5p_dm9000_resources[] = {
+	[0] = {
+		.start = S5P_PA_DM9000,
+		.end   = S5P_PA_DM9000,
+		.flags = IORESOURCE_MEM,
+	},
+	[1] = {
+#if defined(CONFIG_DM9000_16BIT)
+		.start = S5P_PA_DM9000 + 4,
+		.end   = S5P_PA_DM9000 + 4,
+		.flags = IORESOURCE_MEM,
+#else
+		.start = S5P_PA_DM9000 + 1,
+		.end   = S5P_PA_DM9000 + 1,
+		.flags = IORESOURCE_MEM,
+#endif
+	},
+	[2] = {
+		.start = IRQ_EINT9,
+		.end   = IRQ_EINT9,
+		.flags = IORESOURCE_IRQ | IORESOURCE_IRQ_HIGHLEVEL,
+	}
+};
+
+static struct dm9000_plat_data s5p_dm9000_platdata = {
+#if defined(CONFIG_DM9000_16BIT)
+	.flags = DM9000_PLATF_16BITONLY | DM9000_PLATF_NO_EEPROM,
+#else
+	.flags = DM9000_PLATF_8BITONLY | DM9000_PLATF_NO_EEPROM,
+#endif
+	.dev_addr = {0x00,0x09,0xc0,0xff,0xec,0x48},
+};
+
+struct platform_device s5p_device_dm9000 = {
+	.name		= "dm9000",
+	.id		=  0,
+	.num_resources	= ARRAY_SIZE(s5p_dm9000_resources),
+	.resource	= s5p_dm9000_resources,
+	.dev		= {
+		.platform_data = &s5p_dm9000_platdata,
+	}
+};
+
+/* need to get the ether addr from armboot */
+static int __init ethaddr_setup(char *line)
+{
+	char *ep;
+	int i;
+
+	/* there should really be routines to do this stuff */
+	for (i = 0; i < 6; i++) {
+		s5p_dm9000_platdata.dev_addr[i] = line ? simple_strtoul(line, &ep, 16) : 0;
+		if (line)
+			line = (*ep) ? ep+1 : ep;
+	}
+	printk("User MAC address: %pM\n", s5p_dm9000_platdata.dev_addr);
+	return 0;
+}
+__setup("ethaddr=", ethaddr_setup);
+#endif
 #if defined(CONFIG_VIDEO_FIMC) || defined(CONFIG_CPU_FREQ) /* TODO: use existing dev */
 static struct resource s3c_fimc0_resource[] = {
 	[0] = {

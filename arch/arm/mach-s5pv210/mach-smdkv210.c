@@ -1121,7 +1121,30 @@ static void mango210_board_cfg_gpio(void)
         }
 
 }
+#ifdef CONFIG_DM9000
+static void __init smdkc110_dm9000_set(void)
+{
+	unsigned int tmp;
 
+	tmp = ((0<<28)|(3<<24)|(7<<16)|(1<<12)|(3<<8)|(6<<4)|(0<<0));
+	__raw_writel(tmp, (S5P_SROM_BW+0x08));//Bc1
+	
+	tmp = __raw_readl(S5P_SROM_BW);
+	tmp &= ~(0xf << 4);
+	
+
+	tmp |= (0x1 << 4);
+	tmp |= (0x2 << 4);
+
+	__raw_writel(tmp, S5P_SROM_BW);
+
+	tmp = __raw_readl(S5PV210_MP01CON);
+	tmp &= ~(0xf << 4);
+	tmp |= (2 << 4);
+
+	__raw_writel(tmp, S5PV210_MP01CON);
+}
+#endif
 
 static void __init mango210_sound_init(void)
 {
@@ -1167,6 +1190,9 @@ static struct platform_device *mango210_devices[] __initdata = {
 	&s3c_device_i2c0,
 	&s3c_device_i2c1,
 	&s3c_device_i2c2,
+#ifdef CONFIG_DM9000
+	&s5p_device_dm9000,
+#endif
 //#ifdef CONFIG_SND_S3C_SOC_AC97
 	&s5pv210_device_ac97,
 //#endif
@@ -1754,7 +1780,9 @@ static void __init mango210_machine_init(void)
 #ifdef CONFIG_ANDROID_PMEM
         android_pmem_set_platdata();
 #endif
-
+#ifdef CONFIG_DM9000
+	smdkc110_dm9000_set();
+#endif
 	mango210_sound_init();
 
 	s3c24xx_ts_set_platdata(&s3c_ts_platform);

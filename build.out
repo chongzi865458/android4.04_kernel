@@ -8,187 +8,8 @@ scripts/kconfig/conf --silentoldconfig Kconfig
 make[1]: `include/generated/mach-types.h' is up to date.
   CALL    scripts/checksyscalls.sh
   CHK     include/generated/compile.h
-  CC      sound/core/vmaster.o
-  LD      sound/core/snd-timer.o
-  LD      sound/core/snd-pcm.o
-  LD      sound/core/snd-page-alloc.o
-  LD      sound/core/snd.o
-  LD      sound/core/built-in.o
-  CC      sound/pci/ac97/ac97_codec.o
-  CC      drivers/input/touchscreen/wm97xx-core.o
-  CC      drivers/input/touchscreen/wm9713.o
-  LD      drivers/input/touchscreen/wm97xx-ts.o
-  LD      drivers/input/touchscreen/built-in.o
-  LD      drivers/input/built-in.o
-  CC      sound/pci/ac97/ac97_pcm.o
-  CC      sound/pci/ac97/ac97_proc.o
-  CC      drivers/media/video/samsung/tv20/s5pv210/hdmi_s5pv210.o
-  LD      sound/pci/ac97/snd-ac97-codec.o
-  LD      sound/pci/ac97/built-in.o
-  LD      drivers/media/video/samsung/tv20/s5p_tvout.o
-  LD      sound/pci/built-in.o
-  LD      drivers/media/video/samsung/tv20/built-in.o
-  LD      drivers/media/video/samsung/built-in.o
-  LD      drivers/media/video/built-in.o
-  LD      drivers/media/built-in.o
-  CC      sound/soc/codecs/ac97.o
-  CC      sound/soc/codecs/ad1836.o
-  CC      sound/soc/codecs/ad193x.o
-  CC      sound/soc/codecs/ad1980.o
-  CC      sound/soc/codecs/ad73311.o
-  CC      sound/soc/codecs/ads117x.o
-  CC      sound/soc/codecs/ak4104.o
-  CC      sound/soc/codecs/ak4535.o
-  CC      sound/soc/codecs/ak4641.o
-  CC      sound/soc/codecs/ak4642.o
-  LD      drivers/switch/built-in.o
-  CC [M]  drivers/switch/switch_class.o
-  CC      sound/soc/codecs/ak4671.o
-  CC      sound/soc/codecs/alc5623.o
-  CC      sound/soc/codecs/cs4270.o
-  CC      sound/soc/codecs/cs4271.o
-  CC      sound/soc/codecs/cs42l51.o
-  CC      sound/soc/codecs/cx20442.o
-  CC      sound/soc/codecs/da7210.o
-  CC      sound/soc/codecs/dfbmcs320.o
-  LD      drivers/built-in.o
-  CC      sound/soc/codecs/l3.o
-  CC      sound/soc/codecs/lm4857.o
-  CC      sound/soc/codecs/max98088.o
-  CC      sound/soc/codecs/max98095.o
-  CC      sound/soc/codecs/max9850.o
-  CC      sound/soc/codecs/max9877.o
-  CC      sound/soc/codecs/pcm3008.o
-  CC      sound/soc/codecs/sgtl5000.o
-  CC      sound/soc/codecs/spdif_transciever.o
-  CC      sound/soc/codecs/ssm2602.o
-  CC      sound/soc/codecs/stac9766.o
-  CC      sound/soc/codecs/tlv320aic23.o
-  CC      sound/soc/codecs/tlv320aic26.o
-  CC      sound/soc/codecs/tlv320aic32x4.o
-  CC      sound/soc/codecs/tlv320aic3x.o
-  CC      sound/soc/codecs/tlv320dac33.o
-  CC      sound/soc/codecs/tpa6130a2.o
-  CC      sound/soc/codecs/uda134x.o
-  CC      sound/soc/codecs/uda1380.o
-  CC      sound/soc/codecs/wm_hubs.o
-  CC      sound/soc/codecs/wm1250-ev1.o
-  CC      sound/soc/codecs/wm2000.o
-  CC      sound/soc/codecs/wm8510.o
-  CC      sound/soc/codecs/wm8523.o
-  CC      sound/soc/codecs/wm8580.o
-  CC      sound/soc/codecs/wm8711.o
-  CC      sound/soc/codecs/wm8727.o
-  CC      sound/soc/codecs/wm8728.o
-  CC      sound/soc/codecs/wm8731.o
-  CC      sound/soc/codecs/wm8737.o
-  CC      sound/soc/codecs/wm8741.o
-  CC      sound/soc/codecs/wm8750.o
-  CC      sound/soc/codecs/wm8753.o
-  CC      sound/soc/codecs/wm8770.o
-  CC      sound/soc/codecs/wm8776.o
-  CC      sound/soc/codecs/wm8804.o
-  CC      sound/soc/codecs/wm8900.o
-  CC      sound/soc/codecs/wm8903.o
-  CC      sound/soc/codecs/wm8904.o
-  CC      sound/soc/codecs/wm8915.o
-  CC      sound/soc/codecs/wm8940.o
-  CC      sound/soc/codecs/wm8955.o
-  CC      sound/soc/codecs/wm8961.o
-  CC      sound/soc/codecs/wm8962.o
-  CC      sound/soc/codecs/wm8971.o
-  CC      sound/soc/codecs/wm8974.o
-  CC      sound/soc/codecs/wm8978.o
-  CC      sound/soc/codecs/wm8985.o
-  CC      sound/soc/codecs/wm8988.o
-  CC      sound/soc/codecs/wm8990.o
-  CC      sound/soc/codecs/wm8991.o
-  CC      sound/soc/codecs/wm8993.o
-  CC      sound/soc/codecs/wm8995.o
-  CC      sound/soc/codecs/wm9081.o
-  CC      sound/soc/codecs/wm9090.o
-  CC      sound/soc/codecs/wm9705.o
-  CC      sound/soc/codecs/wm9712.o
-  LD      sound/soc/codecs/snd-soc-ac97.o
-  LD      sound/soc/codecs/snd-soc-ad1836.o
-  LD      sound/soc/codecs/snd-soc-ad193x.o
-  LD      sound/soc/codecs/snd-soc-ad1980.o
-  LD      sound/soc/codecs/snd-soc-ad73311.o
-  LD      sound/soc/codecs/snd-soc-ads117x.o
-  LD      sound/soc/codecs/snd-soc-ak4104.o
-  LD      sound/soc/codecs/snd-soc-ak4641.o
-  LD      sound/soc/codecs/snd-soc-ak4535.o
-  LD      sound/soc/codecs/snd-soc-ak4642.o
-  LD      sound/soc/codecs/snd-soc-ak4671.o
-  LD      sound/soc/codecs/snd-soc-alc5623.o
-  LD      sound/soc/codecs/snd-soc-cs42l51.o
-  LD      sound/soc/codecs/snd-soc-cs4271.o
-  LD      sound/soc/codecs/snd-soc-cs4270.o
-  LD      sound/soc/codecs/snd-soc-cx20442.o
-  LD      sound/soc/codecs/snd-soc-dfbmcs320.o
-  LD      sound/soc/codecs/snd-soc-l3.o
-  LD      sound/soc/codecs/snd-soc-da7210.o
-  LD      sound/soc/codecs/snd-soc-max98095.o
-  LD      sound/soc/codecs/snd-soc-max98088.o
-  LD      sound/soc/codecs/snd-soc-max9850.o
-  LD      sound/soc/codecs/snd-soc-pcm3008.o
-  LD      sound/soc/codecs/snd-soc-sgtl5000.o
-  LD      sound/soc/codecs/snd-soc-spdif.o
-  LD      sound/soc/codecs/snd-soc-ssm2602.o
-  LD      sound/soc/codecs/snd-soc-stac9766.o
-  LD      sound/soc/codecs/snd-soc-tlv320aic23.o
-  LD      sound/soc/codecs/snd-soc-tlv320aic3x.o
-  LD      sound/soc/codecs/snd-soc-tlv320aic26.o
-  LD      sound/soc/codecs/snd-soc-tlv320aic32x4.o
-  LD      sound/soc/codecs/snd-soc-tlv320dac33.o
-  LD      sound/soc/codecs/snd-soc-uda1380.o
-  LD      sound/soc/codecs/snd-soc-uda134x.o
-  LD      sound/soc/codecs/snd-soc-wm1250-ev1.o
-  LD      sound/soc/codecs/snd-soc-wm8510.o
-  LD      sound/soc/codecs/snd-soc-wm8523.o
-  LD      sound/soc/codecs/snd-soc-wm8580.o
-  LD      sound/soc/codecs/snd-soc-wm8711.o
-  LD      sound/soc/codecs/snd-soc-wm8728.o
-  LD      sound/soc/codecs/snd-soc-wm8727.o
-  LD      sound/soc/codecs/snd-soc-wm8731.o
-  LD      sound/soc/codecs/snd-soc-wm8741.o
-  LD      sound/soc/codecs/snd-soc-wm8737.o
-  LD      sound/soc/codecs/snd-soc-wm8750.o
-  LD      sound/soc/codecs/snd-soc-wm8753.o
-  LD      sound/soc/codecs/snd-soc-wm8770.o
-  LD      sound/soc/codecs/snd-soc-wm8776.o
-  LD      sound/soc/codecs/snd-soc-wm8804.o
-  LD      sound/soc/codecs/snd-soc-wm8900.o
-  LD      sound/soc/codecs/snd-soc-wm8904.o
-  LD      sound/soc/codecs/snd-soc-wm8903.o
-  LD      sound/soc/codecs/snd-soc-wm8915.o
-  LD      sound/soc/codecs/snd-soc-wm8940.o
-  LD      sound/soc/codecs/snd-soc-wm8955.o
-  LD      sound/soc/codecs/snd-soc-wm8961.o
-  LD      sound/soc/codecs/snd-soc-wm8960.o
-  LD      sound/soc/codecs/snd-soc-wm8962.o
-  LD      sound/soc/codecs/snd-soc-wm8971.o
-  LD      sound/soc/codecs/snd-soc-wm8974.o
-  LD      sound/soc/codecs/snd-soc-wm8978.o
-  LD      sound/soc/codecs/snd-soc-wm8985.o
-  LD      sound/soc/codecs/snd-soc-wm8988.o
-  LD      sound/soc/codecs/snd-soc-wm8990.o
-  LD      sound/soc/codecs/snd-soc-wm8991.o
-  LD      sound/soc/codecs/snd-soc-wm8993.o
-  LD      sound/soc/codecs/snd-soc-wm8995.o
-  LD      sound/soc/codecs/snd-soc-wm9081.o
-  LD      sound/soc/codecs/snd-soc-wm9705.o
-  LD      sound/soc/codecs/snd-soc-wm9713.o
-  LD      sound/soc/codecs/snd-soc-wm9712.o
-  LD      sound/soc/codecs/snd-soc-wm-hubs.o
-  LD      sound/soc/codecs/snd-soc-lm4857.o
-  LD      sound/soc/codecs/snd-soc-max9877.o
-  LD      sound/soc/codecs/snd-soc-tpa6130a2.o
-  LD      sound/soc/codecs/snd-soc-wm2000.o
-  LD      sound/soc/codecs/snd-soc-wm9090.o
-  LD      sound/soc/codecs/built-in.o
-  LD      sound/soc/built-in.o
-  LD      sound/built-in.o
+  CC      arch/arm/plat-s5p/devs.o
+  LD      arch/arm/plat-s5p/built-in.o
   LD      vmlinux.o
   MODPOST vmlinux.o
 WARNING: modpost: Found 3 section mismatch(es).
@@ -212,15 +33,13 @@ To see full details build your kernel with:
   Building modules, stage 2.
   MODPOST 3 modules
   Kernel: arch/arm/boot/Image is ready
-  CC      drivers/switch/switch_class.mod.o
   GZIP    arch/arm/boot/compressed/piggy.gzip
   SHIPPED arch/arm/boot/compressed/lib1funcs.S
   AS      arch/arm/boot/compressed/lib1funcs.o
-  LD [M]  drivers/switch/switch_class.ko
   AS      arch/arm/boot/compressed/piggy.gzip.o
   LD      arch/arm/boot/compressed/vmlinux
   OBJCOPY arch/arm/boot/zImage
   Kernel: arch/arm/boot/zImage is ready
 Copy Kernel Image to Image Folder
 Copy Kernel Image to Install Directory
-Total compile time is 2 minutes 3 seconds
+Total compile time is 2 minutes 4 seconds

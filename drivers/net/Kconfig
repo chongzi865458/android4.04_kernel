@@ -985,6 +985,13 @@ config DM9000
 	  To compile this driver as a module, choose M here.  The module
 	  will be called dm9000.
 
+config DM9000_16BIT
+	bool "DM9000 16-bit"
+	depends on DM9000
+	default n
+	help
+	  Support DM9000 ethernet controller with 16bit data bus
+
 config DM9000_DEBUGLEVEL
 	int "DM9000 maximum debug level"
 	depends on DM9000
