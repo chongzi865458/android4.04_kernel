@@ -1167,9 +1167,9 @@ static struct platform_device *mango210_devices[] __initdata = {
 	&s3c_device_i2c0,
 	&s3c_device_i2c1,
 	&s3c_device_i2c2,
-#ifdef CONFIG_TOUCHSCREEN_EGALAX
-	&s3c_device_i2c5,
-#endif
+//#ifdef CONFIG_SND_S3C_SOC_AC97
+	&s5pv210_device_ac97,
+//#endif
 	&s3c_device_rtc,
 	&s3c_device_ts,
 	&s3c_device_wdt,
