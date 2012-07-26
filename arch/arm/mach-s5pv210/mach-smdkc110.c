@@ -664,7 +664,63 @@ static void __init android_pmem_set_platdata(void)
                 (u32)s5p_get_media_memsize_bank(S5P_MDEV_PMEM_ADSP, 0);
 }
 #endif
+/******************************************************************************
+ * keypad
+ ******************************************************************************/
+//#ifdef CONFIG_KEYBOARD_S3C_GPIO
+static struct gpio_keys_button gpio_buttons[] = {
+	{
+		.gpio		= S5PV210_GPH0(0),
+		.code		= 231,
+		.desc		= "CALL",
+		.active_low	= 1,
+		.wakeup		= 1,
+	},	
+	{
+		.gpio		= S5PV210_GPH0(1),
+		.code		= 139,
+		.desc		= "MENU",
+		.active_low	= 1,
+		.wakeup		= 1,
+	},
+	{
+		.gpio		= S5PV210_GPH0(3),
+		.code		= 158,
+		.desc		= "BACK",
+		.active_low	= 1,
+		.wakeup		= 1,
+	},
+	{
+		.gpio		= S5PV210_GPH0(4),
+		.code		= 107,
+		.desc		= "ENDCALL",
+		.active_low	= 1,
+		.wakeup		= 1,
+	},		
+	{
+		.gpio		= S5PV210_GPH0(5),
+		.code		= 102,
+		.desc		= "HOME",	
+		.active_low	= 1,
+		.wakeup		= 1,
+	},
+};
 
+static struct gpio_keys_platform_data gpio_button_data = {
+	.buttons	= gpio_buttons,
+	.nbuttons	= ARRAY_SIZE(gpio_buttons),
+};
+
+static struct platform_device s3c_device_gpio_button = {
+	.name		= "gpio-keys",
+	.id		= -1,
+	.num_resources	= 0,
+	.dev		= {
+		.platform_data	= &gpio_button_data,
+	}
+};
+//#endif
+/*********************************************************************************************************/
 
 static void smdkv210_lte480wv_set_power(struct plat_lcd_data *pd,
 					unsigned int power)
@@ -1033,6 +1089,7 @@ static struct platform_device *smdkv210_devices[] __initdata = {
 	&s5pv210_device_spdif,
 	&samsung_asoc_dma,
 	&samsung_device_keypad,
+	&s3c_device_gpio_button,
 	&smdkv210_dm9000,
 	&smdkv210_lcd_lte480wv,
 	&s3c_device_timer[3],

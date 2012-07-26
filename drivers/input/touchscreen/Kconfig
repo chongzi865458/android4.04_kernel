@@ -144,6 +144,13 @@ config TOUCHSCREEN_DA9034
 	  Say Y here to enable the support for the touchscreen found
 	  on Dialog Semiconductor DA9034 PMIC.
 
+config TOUCHSCREEN_FORLINX
+	tristate "forlinx multi-touch driver"
+	depends on CPU_S5PV210
+	default y
+	help
+	  Say Y here to enable the driver forlinx multi-touchscreen.
+
 config TOUCHSCREEN_DYNAPRO
 	tristate "Dynapro serial touchscreen"
 	select SERIO

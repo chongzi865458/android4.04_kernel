@@ -36,12 +36,12 @@ cp -a arch/arm/boot/$KERNEL_IMAGE ../image/
 if [ $INSTALL_BINDIR ]
 then
 echo Copy Kernel Image to Install Directory
-cp -f arch/arm/boot/$KERNEL_IMAGE $INSTALL_BINDIR/$KERNEL_IMAGE
+#cp -f arch/arm/boot/$KERNEL_IMAGE $INSTALL_BINDIR/$KERNEL_IMAGE
 fi
 if [ $INSTALL_BINDIR_2 ]
 then
 echo Copy Kernel Image to Install Directory 2
-cp -f arch/arm/boot/$KERNEL_IMAGE $INSTALL_BINDIR_2/$KERNEL_IMAGE
+#cp -f arch/arm/boot/$KERNEL_IMAGE $INSTALL_BINDIR_2/$KERNEL_IMAGE
 fi
 
 END_TIME=`date +%s`
