@@ -642,7 +642,7 @@ static void __init android_pmem_set_platdata(void)
 }
 #endif
 
-
+#ifdef CONFIG_FB_S3C_LB070WV6
 static void mango210_lb070wv6_set_power(struct plat_lcd_data *pd,
 					unsigned int power)
 {
@@ -679,7 +679,7 @@ static struct platform_device mango210_lcd_lb070wv6 = {
 	.dev.parent		= &s3c_device_fb.dev,
 	.dev.platform_data	= &mango210_lcd_lb070wv6_data,
 };
-
+#endif
 #if 0
 static struct s3c_fb_pd_win mango210_fb_win0 = {
 	.win_mode = {
@@ -705,7 +705,7 @@ static struct s3c_fb_platdata mango210_lcd0_pdata __initdata = {
 #endif 
 //#define S5PV210_LCD_WIDTH  800
 //#define S5PV210_LCD_HEIGHT 480
-#ifdef CONFIG_FB_S3C_LTE480WV
+/*#ifdef CONFIG_FB_S3C_LTE480WV
 static struct s3cfb_lcd lte480wv = {
         .width = S5PV210_LCD_WIDTH,
         .height = S5PV210_LCD_HEIGHT,
@@ -729,8 +729,149 @@ static struct s3cfb_lcd lte480wv = {
                 .inv_vden = 0,
         },
 };
-#endif
+#endif*/
+#define S5PV210_GPD_0_0_TOUT_0  (0x2)
+#define S5PV210_GPD_0_1_TOUT_1  (0x2 << 4)
+#define S5PV210_GPD_0_2_TOUT_2  (0x2 << 8)
+#define S5PV210_GPD_0_3_TOUT_3  (0x2 << 12)
+#ifdef CONFIG_FB_S3C_LTE480WV  //jhk
+static struct s3cfb_lcd lte480wv = {
+	.width	= 800,
+	.height	= 480,
+	.bpp	= 16,
+	.freq	= 70,
 
+	.timing = {
+		.h_fp	= 210,
+		.h_bp	= 16,
+		.h_sw	= 30,
+		.v_fp	= 22,
+		.v_fpe	= 1,
+		.v_bp	= 10,
+		.v_bpe	= 1,
+		.v_sw	= 13,
+	},
+
+	.polarity = {
+		.rise_vclk	= 0,
+		.inv_hsync	= 1,
+		.inv_vsync	= 1,
+		.inv_vden	= 0,
+	},
+};
+
+static void lte480wv_cfg_gpio(struct platform_device *pdev)
+{
+	int i;
+
+	for (i = 0; i < 8; i++) {
+		s3c_gpio_cfgpin(S5PV210_GPF0(i), S3C_GPIO_SFN(2));
+		s3c_gpio_setpull(S5PV210_GPF0(i), S3C_GPIO_PULL_NONE);
+	}
+
+	for (i = 0; i < 8; i++) {
+		s3c_gpio_cfgpin(S5PV210_GPF1(i), S3C_GPIO_SFN(2));
+		s3c_gpio_setpull(S5PV210_GPF1(i), S3C_GPIO_PULL_NONE);
+	}
+
+	for (i = 0; i < 8; i++) {
+		s3c_gpio_cfgpin(S5PV210_GPF2(i), S3C_GPIO_SFN(2));
+		s3c_gpio_setpull(S5PV210_GPF2(i), S3C_GPIO_PULL_NONE);
+	}
+
+	for (i = 0; i < 4; i++) {
+		s3c_gpio_cfgpin(S5PV210_GPF3(i), S3C_GPIO_SFN(2));
+		s3c_gpio_setpull(S5PV210_GPF3(i), S3C_GPIO_PULL_NONE);
+	}
+
+	/* mDNIe SEL: why we shall write 0x2 ? */
+	writel(0x2, S5P_MDNIE_SEL);
+
+	/* drive strength to max */
+	writel(0xffffffff, S5PV210_GPF0_BASE + 0xc);
+	writel(0xffffffff, S5PV210_GPF1_BASE + 0xc);
+	writel(0xffffffff, S5PV210_GPF2_BASE + 0xc);
+	writel(0x000000ff, S5PV210_GPF3_BASE + 0xc);
+}
+
+
+static int lte480wv_backlight_on(struct platform_device *pdev)
+{
+	int err;
+
+	err = gpio_request(S5PV210_GPD0(0), "GPD0");
+
+	if (err) {
+		printk(KERN_ERR "failed to request GPD0 for "
+			"lcd backlight control\n");
+		return err;
+	}
+
+	gpio_direction_output(S5PV210_GPD0(0), 1);
+
+	s3c_gpio_cfgpin(S5PV210_GPD0(0), S5PV210_GPD_0_0_TOUT_0);
+
+	gpio_free(S5PV210_GPD0(0));
+
+	return 0;
+}
+
+static int lte480wv_backlight_off(struct platform_device *pdev, int onoff)
+{
+	int err;
+
+	err = gpio_request(S5PV210_GPD0(0), "GPD0");
+	if (err) {
+		printk(KERN_ERR "failed to request GPD0 for "
+				"lcd backlight control\n");
+		return err;
+	}
+
+	gpio_direction_output(S5PV210_GPD0(0), 0);
+
+	gpio_free(S5PV210_GPD0(0));
+	return 0;
+}
+
+static int lte480wv_reset_lcd(struct platform_device *pdev)
+{
+/*
+	int err;
+
+	err = gpio_request(S5PV210_GPH0(6), "GPH0");
+	if (err) {
+		printk(KERN_ERR "failed to request GPH0 for "
+				"lcd reset control\n");
+		return err;
+	}
+
+	gpio_direction_output(S5PV210_GPH0(6), 1);
+	mdelay(100);
+
+	gpio_set_value(S5PV210_GPH0(6), 0);
+	mdelay(10);
+
+	gpio_set_value(S5PV210_GPH0(6), 1);
+	mdelay(10);
+
+	gpio_free(S5PV210_GPH0(6));
+*/
+	return 0;
+}
+
+static struct s3c_platform_fb lte480wv_fb_data __initdata = {
+	.hw_ver	= 0x62,
+	.nr_wins = 5,
+	.default_win = CONFIG_FB_S3C_DEFAULT_WINDOW,
+	.swap = FB_SWAP_WORD | FB_SWAP_HWORD,
+
+	.lcd = &lte480wv,
+	.cfg_gpio	= lte480wv_cfg_gpio,
+	.backlight_on	= lte480wv_backlight_on,
+	.backlight_onoff    = lte480wv_backlight_off,
+	.reset_lcd	= lte480wv_reset_lcd,
+};
+#endif
 #ifdef CONFIG_FB_S3C_LB070WV6
 static struct s3cfb_lcd lb070wv6 = {
         .width = S5PV210_LCD_WIDTH,
@@ -781,7 +922,7 @@ static struct s3cfb_lcd lb070wv6 = {
 	},
 };
 #endif
-
+#ifdef CONFIG_FB_S3C_LB070WV6
 static void lb070wv6_cfg_gpio(struct platform_device *pdev)
 {
         int i;
@@ -818,13 +959,11 @@ static void lb070wv6_cfg_gpio(struct platform_device *pdev)
         writel(0xC0, S5PV210_GPF0_BASE + 0xc);
 #endif
 }
+#endif
 
 
 
-#define S5PV210_GPD_0_0_TOUT_0  (0x2)
-#define S5PV210_GPD_0_1_TOUT_1  (0x2 << 4)
-#define S5PV210_GPD_0_2_TOUT_2  (0x2 << 8)
-#define S5PV210_GPD_0_3_TOUT_3  (0x2 << 12)
+#ifdef CONFIG_FB_S3C_LB070WV6
 static int lb070wv6_backlight_on(struct platform_device *pdev)
 {
         int err;
@@ -864,7 +1003,7 @@ static int lb070wv6_backlight_off(struct platform_device *pdev, int onoff)
 
         return 0;
 }
-
+#endif//jhk
 #ifdef CONFIG_FB_S3C_TL2796
 void lcd_cfg_gpio_early_suspend(void)
 {
@@ -876,7 +1015,7 @@ void lcd_cfg_gpio_late_resume(void)
 	    return;
 }
 #endif
-
+#ifdef CONFIG_FB_S3C_LB070WV6
 static int lb070wv6_reset_lcd(struct platform_device *pdev)
 {
         return 0;
@@ -895,7 +1034,7 @@ static struct s3c_platform_fb lb070wv6_fb_data __initdata = {
         .backlight_onoff    = lb070wv6_backlight_off,
         .reset_lcd      = lb070wv6_reset_lcd,
 };
-
+#endif //jhk
 static int mango210_backlight_init(struct device *dev)
 {
 	//need to check the calling function for this function and remove the call.
@@ -1207,7 +1346,7 @@ static struct platform_device *mango210_devices[] __initdata = {
 #endif
 	&mango210_buttons_device,
 	&mango210_leds_device,
-	&mango210_lcd_lb070wv6,
+//	&mango210_lcd_lb070wv6,
 	&s3c_device_timer[3],
 
 #ifdef CONFIG_BATTERY_S3C
@@ -1772,8 +1911,10 @@ static void __init mango210_machine_init(void)
 
 	mango210_board_cfg_gpio();
 
-	lg_lb070wv6_lcd_on();
-
+//	lg_lb070wv6_lcd_on();
+#ifdef CONFIG_FB_S3C_LTE480WV
+	s3c_fb_set_platdata(&lte480wv_fb_data);
+#endif//jhk
 	mango210_smsc9220_init();
 	platform_add_devices(mango210_devices, ARRAY_SIZE(mango210_devices));
 
@@ -1800,7 +1941,7 @@ static void __init mango210_machine_init(void)
 	i2c_register_board_info(5, i2c_devs5, ARRAY_SIZE(i2c_devs5));
 #endif
 
-	s3c_fb_set_platdata(&lb070wv6_fb_data);
+//	s3c_fb_set_platdata(&lb070wv6_fb_data);
 
 #ifdef CONFIG_S3C_DEV_HSMMC
         s3c_sdhci0_set_platdata(&smdkc110_hsmmc0_pdata);
