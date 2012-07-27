@@ -1352,7 +1352,7 @@ static struct platform_device *mango210_devices[] __initdata = {
 #ifdef CONFIG_BATTERY_S3C
         &sec_device_battery,
 #endif
-	// &mango210_backlight_device,
+	&mango210_backlight_device,
 	&s5p_device_ehci,
 	&s5p_device_ohci,
 #ifdef CONFIG_USB_GADGET

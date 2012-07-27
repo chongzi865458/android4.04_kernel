@@ -232,7 +232,7 @@ static void ts_poscheck(struct work_struct *work)
 				input_report_abs(tsdata->input, ABS_MT_POSITION_Y, posy[i]);
 				input_report_key(tsdata->input, BTN_TOUCH , 1);    // pressed jhk
 //				input_report_key(tsdata->input, BTN_TOUCH , 0);    // realse  jhk
-				printk("@@@@@@@@@@report the value\n");
+//				printk("@@@@@@@@@@report the value\n");
 				input_mt_sync(tsdata->input);
 			}
 		}
@@ -241,9 +241,9 @@ static void ts_poscheck(struct work_struct *work)
 			input_report_abs(tsdata->input, ABS_MT_TOUCH_MAJOR, 0);
 	//		input_report_key(tsdata->input, BTN_TOUCH , 0);//jhk
 			input_mt_sync(tsdata->input);	
-			printk("@@@@@@@@@@@@@@@@@@@@@@styleup\n");
+//			printk("@@@@@@@@@@@@@@@@@@@@@@styleup\n");
 		}
-		printk("#####################getup\n");
+//		printk("#####################getup\n");
 		input_sync(tsdata->input);
 		queue_work(ts_wq, &tsdata->work.work);
 	}
@@ -329,6 +329,7 @@ static int ts_i2c_probe(struct i2c_client *client,
 	INIT_WORK(&tsdata->work.work, ts_poscheck);
 
 	if (input_register_device(input)) {
+
 		input_free_device(input);
 		kfree(tsdata);
 	}
