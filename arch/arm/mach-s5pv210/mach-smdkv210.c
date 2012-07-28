@@ -978,7 +978,7 @@ static int lb070wv6_backlight_on(struct platform_device *pdev)
 
         gpio_direction_output(S5PV210_GPD0(0), 1);
 
-        s3c_gpio_cfgpin(S5PV210_GPD0(0), S5PV210_GPD_0_1_TOUT_1);
+        s3c_gpio_cfgpin(S5PV210_GPD0(0), S5PV210_GPD_0_0_TOUT_0);
 
         gpio_free(S5PV210_GPD0(0));
 
@@ -1071,6 +1071,53 @@ struct s3c_adc_mach_info {
         int presc;
         int resolution;
 };
+#ifdef CONFIG_HAVE_PWM  //jhk
+struct s3c_pwm_data {
+	/* PWM output port */
+	unsigned int gpio_no;
+	const char  *gpio_name;
+	unsigned int gpio_set_value;
+};
+
+struct s3c_pwm_data pwm_data[] = {
+	{
+		.gpio_no    = S5PV210_GPD0(0),
+		.gpio_name  = "GPD",
+		.gpio_set_value = S5PV210_GPD_0_0_TOUT_0,
+	}, {
+		.gpio_no    = S5PV210_GPD0(1),
+		.gpio_name  = "GPD",
+		.gpio_set_value = S5PV210_GPD_0_1_TOUT_1,
+	}, {
+		.gpio_no    = S5PV210_GPD0(2),
+		.gpio_name      = "GPD",
+		.gpio_set_value = S5PV210_GPD_0_2_TOUT_2,
+	}, {
+		.gpio_no    = S5PV210_GPD0(3),
+		.gpio_name      = "GPD",
+		.gpio_set_value = S5PV210_GPD_0_3_TOUT_3,
+	}
+};
+#endif
+
+#if defined(CONFIG_BACKLIGHT_PWM)
+static struct platform_pwm_backlight_data smdk_backlight_data = {
+	.pwm_id  = 0,
+	.max_brightness = 255,
+	.dft_brightness = 155,
+	.pwm_period_ns  = 1000,//25000,
+};
+
+static struct platform_device smdk_backlight_device = {
+	.name      = "pwm-backlight",
+//	.id        = -1,
+	.dev        = {
+		.parent = &s3c_device_timer[0].dev,
+		.platform_data = &smdk_backlight_data,
+	},
+};
+
+#endif
 
 /*
  * mangov210 button
@@ -1347,12 +1394,16 @@ static struct platform_device *mango210_devices[] __initdata = {
 	&mango210_buttons_device,
 	&mango210_leds_device,
 //	&mango210_lcd_lb070wv6,
+#ifdef CONFIG_HAVE_PWM
+	&s3c_device_timer[0],
+	&s3c_device_timer[1],
+	&s3c_device_timer[2],
 	&s3c_device_timer[3],
-
+#endif
 #ifdef CONFIG_BATTERY_S3C
         &sec_device_battery,
 #endif
-	&mango210_backlight_device,
+	&smdk_backlight_device,
 	&s5p_device_ehci,
 	&s5p_device_ohci,
 #ifdef CONFIG_USB_GADGET
@@ -1795,7 +1846,6 @@ static struct s3c2410_ts_mach_info s3c_ts_platform __initdata = {
 
 };
 
-
 static void __init mango210_map_io(void)
 {
 	s5p_init_io(NULL, 0, S5P_VA_CHIPID);
@@ -1911,7 +1961,7 @@ static void __init mango210_machine_init(void)
 
 	mango210_board_cfg_gpio();
 
-//	lg_lb070wv6_lcd_on();
+	lg_lb070wv6_lcd_on();
 #ifdef CONFIG_FB_S3C_LTE480WV
 	s3c_fb_set_platdata(&lte480wv_fb_data);
 #endif//jhk
@@ -1997,6 +2047,7 @@ static void __init mango210_machine_init(void)
 	}
 	spi_register_board_info(s3c_spi_devs, ARRAY_SIZE(s3c_spi_devs));
 #endif
+ 
 
 	mango210_otg_init();
         mango210_ehci_init();
