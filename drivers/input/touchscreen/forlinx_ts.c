@@ -12,7 +12,7 @@
 #include <plat/gpio-cfg.h>
 #include <mach/regs-gpio.h>
 
-#define	PIXCIR_DEBUG		1
+#define	PIXCIR_DEBUG		0
 
 #define I2C_BUS_NUM			0
 #define	SLAVE_ADDR			0x5c
@@ -209,11 +209,11 @@ static void ts_poscheck(struct work_struct *work)
 		input_report_abs(tsdata->input, ABS_MT_TOUCH_MAJOR, 0);
 		input_report_abs(tsdata->input, ABS_MT_WIDTH_MAJOR, 0);
 		input_mt_sync(tsdata->input);	
-		input_report_key(tsdata->input, BTN_TOUCH , 0);//jhk
+//		input_report_key(tsdata->input, BTN_TOUCH , 0);//jhk
 		input_sync(tsdata->input);
 
 		enable_irq(tsdata->irq);
-		printk("gpio_get_value\n");
+	
 	}
 	else
 	{		
@@ -232,18 +232,17 @@ static void ts_poscheck(struct work_struct *work)
 				input_report_abs(tsdata->input, ABS_MT_POSITION_Y, posy[i]);
 				input_report_key(tsdata->input, BTN_TOUCH , 1);    // pressed jhk
 //				input_report_key(tsdata->input, BTN_TOUCH , 0);    // realse  jhk
-//				printk("@@@@@@@@@@report the value\n");
 				input_mt_sync(tsdata->input);
 			}
 		}
 		else
 		{
 			input_report_abs(tsdata->input, ABS_MT_TOUCH_MAJOR, 0);
-	//		input_report_key(tsdata->input, BTN_TOUCH , 0);//jhk
 			input_mt_sync(tsdata->input);	
 //			printk("@@@@@@@@@@@@@@@@@@@@@@styleup\n");
 		}
 //		printk("#####################getup\n");
+	//	input_report_key(tsdata->input, BTN_TOUCH , 0);    // release  jhk
 		input_sync(tsdata->input);
 		queue_work(ts_wq, &tsdata->work.work);
 	}
@@ -251,7 +250,7 @@ static void ts_poscheck(struct work_struct *work)
 
 static irqreturn_t ts_ts_isr(int irq, void *dev_id)
 {
-	printk("*******************ts_ts_isr************\n");
+//	printk("*******************ts_ts_isr************\n");
 	struct ts_i2c_data *tsdata = (struct ts_i2c_data *)dev_id;
 //	if ((status_reg == 0) || (status_reg == NORMAL_MODE)) {
 		disable_irq_nosync(irq);

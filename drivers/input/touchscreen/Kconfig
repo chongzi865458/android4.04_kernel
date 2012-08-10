@@ -151,6 +151,13 @@ config TOUCHSCREEN_FORLINX
 	help
 	  Say Y here to enable the driver forlinx multi-touchscreen.
 
+config TOUCHSCREEN_FT5306
+	tristate "FT5306 multi-touch driver"
+	depends on CPU_S5PV210
+	default y
+	help
+	  Say Y here to enable the driver FT5306 multi-touchscreen.
+
 config TOUCHSCREEN_DYNAPRO
 	tristate "Dynapro serial touchscreen"
 	select SERIO

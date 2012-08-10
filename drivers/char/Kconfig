@@ -28,6 +28,47 @@ config DEVKMEM
 	  kind of kernel debugging operations.
 	  When in doubt, say "N".
 
+config FL210_LEDS
+	tristate "LED Support for Forlinx FL210 GPIO LEDs"
+	depends on MACH_SMDKV210
+	default y
+	help
+	  This option enables support for LEDs connected to GPIO lines
+	  on FL210 boards.
+
+config FL210_HELLO_MODULE
+	tristate "HelloWorld module sample for FL210"
+	depends on CPU_S5PV210
+	help
+	  FL210 module sample.
+
+config FL210_BUTTONS
+	tristate "Buttons driver for Forlinx FL210 development boards"
+	depends on CPU_S5PV210 && !KEYBOARD_GPIO
+	default y if !KEYBOARD_GPIO
+	help
+	  this is buttons driver for Forlinx FL210 development boards
+
+config FL210_BUZZER
+	tristate "Buzzer driver for Forlinx FL210 development boards"
+	depends on MACH_SMDKV210
+	default y
+	help
+	  this is buzzer driver for Forlinx FL210 development boards
+
+config FL210_ADC
+	tristate "ADC driver for Forlinx FL210 development boards"
+	depends on MACH_SMDKV210
+	default y
+	help
+	  this is ADC driver for Forlinx FL210 development boards
+config FL210_TEM
+	tristate "TEMPERATURE driver for Forlinx FL210 development boards"
+	depends on MACH_SMDKV210
+	default y
+	help
+	  this is 18b20 driver for Forlinx FL210 development boards
+
 config STALDRV
 	bool "Stallion multiport serial support"
 	depends on SERIAL_NONSTANDARD

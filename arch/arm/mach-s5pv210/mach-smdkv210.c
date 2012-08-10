@@ -21,7 +21,6 @@
 #include <linux/serial_core.h>
 #include <linux/gpio_event.h>
 #include <linux/sysdev.h>
-#include <linux/smsc911x.h>
 #include <linux/fb.h>
 #include <linux/gpio.h>
 #include <linux/videodev2.h>
@@ -363,39 +362,6 @@ static struct max8698_platform_data mango210_max8698_pdata = {
 };
 #endif
 
-#ifdef CONFIG_SMSC911X
-static struct smsc911x_platform_config smsc911x_config = {
-      .irq_polarity  = SMSC911X_IRQ_POLARITY_ACTIVE_LOW,
-      .irq_type    = SMSC911X_IRQ_TYPE_PUSH_PULL,
-      .flags  = SMSC911X_USE_16BIT || SMSC911X_FORCE_INTERNAL_PHY,
-      .phy_interface  = PHY_INTERFACE_MODE_MII,
-      .mac            = {0x00, 0x80, 0x00, 0x23, 0x45, 0x67},
-};
-
-static struct resource s5p_smsc911x_resources[] = {
-      [0] = {
-              .start  = S5PV210_PA_SROM_BANK1,
-              .end    = S5PV210_PA_SROM_BANK1 + SZ_1M - 1,
-              .flags  = IORESOURCE_MEM,
-      },
-      [1] = {
-              .start = IRQ_EINT(11),
-              .end   = IRQ_EINT(11),
-              .flags = IORESOURCE_IRQ | IRQF_TRIGGER_LOW,
-        },
-};
-
-struct platform_device s5p_device_smsc911x = {
-	.name       = "smsc911x",
-	.id     =  -1,
-	.num_resources  = ARRAY_SIZE(s5p_smsc911x_resources),
-	.resource   = s5p_smsc911x_resources,
-	.dev        = {
-		.platform_data = &smsc911x_config,
-	}
-};
-#endif
-
 #ifdef CONFIG_REGULATOR
 static struct regulator_consumer_supply mango210_b_pwr_5v_consumers[] = {
         {
@@ -428,31 +394,7 @@ static struct platform_device mango210_b_pwr_5v = {
         },
 };
 #endif
-#ifdef CONFIG_TOUCHSCREEN_EGALAX
-static struct i2c_gpio_platform_data i2c5_platdata = {
-        .sda_pin                = S5PV210_GPB(6),
-        .scl_pin                = S5PV210_GPB(7),
-        .udelay                 = 2,
-        .sda_is_open_drain      = 0,
-        .scl_is_open_drain      = 0,
-        .scl_is_output_only     = 0.
-};
 
-//static struct platform_device   s3c_device_i2c5 = {
-struct platform_device   s3c_device_i2c5 = {
-        .name                   = "i2c-gpio",
-        .id                     = 5,
-        .dev.platform_data      = &i2c5_platdata,
-};
-
-static struct i2c_board_info i2c_devs5[] __initdata = {
-        {
-                I2C_BOARD_INFO(EETI_TS_DEV_NAME, 0x04),
-                .platform_data = &egalax_platdata,
-                .irq = IRQ_EINT6,
-        },
-};
-#endif
 
 #ifdef CONFIG_BATTERY_S3C
 struct platform_device sec_device_battery = {
@@ -461,11 +403,7 @@ struct platform_device sec_device_battery = {
 };
 #endif
 
-#ifdef CONFIG_FB_S3C_LB070WV6
-#define S5PV210_LCD_WIDTH 800
-#define S5PV210_LCD_HEIGHT 480
-#define NUM_BUFFER 4
-#endif
+
 
 #ifdef CONFIG_FB_S3C_LTE480WV
 #define S5PV210_LCD_WIDTH 800
@@ -641,95 +579,14 @@ static void __init android_pmem_set_platdata(void)
                 (u32)s5p_get_media_memsize_bank(S5P_MDEV_PMEM_ADSP, 0);
 }
 #endif
-
-#ifdef CONFIG_FB_S3C_LB070WV6
-static void mango210_lb070wv6_set_power(struct plat_lcd_data *pd,
-					unsigned int power)
-{
-	if (power) {
-#if !defined(CONFIG_BACKLIGHT_PWM)
-		gpio_request(S5PV210_GPD0(0), "GPD0_0");
-		gpio_direction_output(S5PV210_GPD0(0), 1);
-		gpio_free(S5PV210_GPD0(0));
+#ifdef CONFIG_FL210_ADC  //jhk
+/*static struct s3c_adc_mach_info s3c_adc_platform __initdata = {*/
+	/* s5pc110 support 12-bit resolution */
+/*	.delay  = 10000,
+	.presc  = 49,
+	.resolution = 12,
+};*/
 #endif
-
-		/* fire POWER Enable */
-		gpio_request(S5PV210_GPC1(4), "GPC1_4");
-
-		gpio_direction_output(S5PV210_GPC1(4), 1);
-
-		gpio_set_value(S5PV210_GPC1(4), 1);
-
-		gpio_free(S5PV210_GPC1(4));
-	} else {
-#if !defined(CONFIG_BACKLIGHT_PWM)
-		gpio_request(S5PV210_GPD0(0), "GPD0_0");
-		gpio_direction_output(S5PV210_GPD0(0), 0);
-		gpio_free(S5PV210_GPD0(0));
-#endif
-	}
-}
-
-static struct plat_lcd_data mango210_lcd_lb070wv6_data = {
-	.set_power	= mango210_lb070wv6_set_power,
-};
-
-static struct platform_device mango210_lcd_lb070wv6 = {
-	.name			= "platform-lcd",
-	.dev.parent		= &s3c_device_fb.dev,
-	.dev.platform_data	= &mango210_lcd_lb070wv6_data,
-};
-#endif
-#if 0
-static struct s3c_fb_pd_win mango210_fb_win0 = {
-	.win_mode = {
-		.left_margin	= 13,
-		.right_margin	= 8,
-		.upper_margin	= 7,
-		.lower_margin	= 5,
-		.hsync_len	= 3,
-		.vsync_len	= 1,
-		.xres		= 800,
-		.yres		= 480,
-	},
-	.max_bpp	= 32,
-	.default_bpp	= 24,
-};
-
-static struct s3c_fb_platdata mango210_lcd0_pdata __initdata = {
-	.win[0]		= &mango210_fb_win0,
-	.vidcon0	= VIDCON0_VIDOUT_RGB | VIDCON0_PNRMODE_RGB,
-	.vidcon1	= VIDCON1_INV_HSYNC | VIDCON1_INV_VSYNC,
-	.setup_gpio	= s5pv210_fb_gpio_setup_24bpp,
-};
-#endif 
-//#define S5PV210_LCD_WIDTH  800
-//#define S5PV210_LCD_HEIGHT 480
-/*#ifdef CONFIG_FB_S3C_LTE480WV
-static struct s3cfb_lcd lte480wv = {
-        .width = S5PV210_LCD_WIDTH,
-        .height = S5PV210_LCD_HEIGHT,
-        .bpp = 32,
-        .freq = 60,
-
-        .timing = {
-                .h_fp = 8,
-                .h_bp = 13,
-                .h_sw = 3,
-                .v_fp = 5,
-                .v_fpe = 1,
-                .v_bp = 7,
-                .v_bpe = 1,
-                .v_sw = 1,
-        },
-        .polarity = {
-                .rise_vclk = 0,
-                .inv_hsync = 1,
-                .inv_vsync = 1,
-                .inv_vden = 0,
-        },
-};
-#endif*/
 #define S5PV210_GPD_0_0_TOUT_0  (0x2)
 #define S5PV210_GPD_0_1_TOUT_1  (0x2 << 4)
 #define S5PV210_GPD_0_2_TOUT_2  (0x2 << 8)
@@ -793,8 +650,45 @@ static void lte480wv_cfg_gpio(struct platform_device *pdev)
 	writel(0xffffffff, S5PV210_GPF2_BASE + 0xc);
 	writel(0x000000ff, S5PV210_GPF3_BASE + 0xc);
 }
+/* forlinx
+static int lte480wv_backlight_on(struct platform_device *pdev)
+{
+	int err;
 
+	err = gpio_request(S5PV210_GPD0(1), "GPD0");
 
+	if (err) {
+		printk(KERN_ERR "failed to request GPD0 for "
+			"lcd backlight control\n");
+		return err;
+	}
+
+	gpio_direction_output(S5PV210_GPD0(1), 1);
+
+	s3c_gpio_cfgpin(S5PV210_GPD0(1), S5PV210_GPD_0_1_TOUT_1);
+
+	gpio_free(S5PV210_GPD0(1));
+
+	return 0;
+}
+
+static int lte480wv_backlight_off(struct platform_device *pdev, int onoff)
+{
+	int err;
+
+	err = gpio_request(S5PV210_GPD0(1), "GPD0");
+	if (err) {
+		printk(KERN_ERR "failed to request GPD0 for "
+				"lcd backlight control\n");
+		return err;
+	}
+
+	gpio_direction_output(S5PV210_GPD0(1), 0);
+
+	gpio_free(S5PV210_GPD0(1));
+	return 0;
+}
+*/
 static int lte480wv_backlight_on(struct platform_device *pdev)
 {
 	int err;
@@ -807,7 +701,7 @@ static int lte480wv_backlight_on(struct platform_device *pdev)
 		return err;
 	}
 
-	gpio_direction_output(S5PV210_GPD0(0), 1);
+	gpio_direction_output(S5PV210_GPD0(0), 0);
 
 	s3c_gpio_cfgpin(S5PV210_GPD0(0), S5PV210_GPD_0_0_TOUT_0);
 
@@ -872,31 +766,7 @@ static struct s3c_platform_fb lte480wv_fb_data __initdata = {
 	.reset_lcd	= lte480wv_reset_lcd,
 };
 #endif
-#ifdef CONFIG_FB_S3C_LB070WV6
-static struct s3cfb_lcd lb070wv6 = {
-        .width = S5PV210_LCD_WIDTH,
-        .height = S5PV210_LCD_HEIGHT,
-        .bpp = 32,
-        .freq = 60,
 
-        .timing = {
-                .h_fp   = 64,
-                .h_bp   = 64,
-                .h_sw   = 128,
-                .v_fp   = 16,
-                .v_fpe  = 1,
-                .v_bp   = 14,
-                .v_bpe  = 1,
-                .v_sw   = 1,
-        },
-        .polarity = {
-                .rise_vclk = 0,
-                .inv_hsync = 1,
-                .inv_vsync = 1,
-                .inv_vden = 0,
-        },
-};
-#endif
 #ifdef CONFIG_FB_S3C_TL2796
 static struct s3cfb_lcd lb070wv6 = {
 	.width = S5PV210_LCD_WIDTH,
@@ -922,88 +792,8 @@ static struct s3cfb_lcd lb070wv6 = {
 	},
 };
 #endif
-#ifdef CONFIG_FB_S3C_LB070WV6
-static void lb070wv6_cfg_gpio(struct platform_device *pdev)
-{
-        int i;
-
-        for (i = 0; i < 8; i++) {
-                s3c_gpio_cfgpin(S5PV210_GPF0(i), S3C_GPIO_SFN(2));
-                s3c_gpio_setpull(S5PV210_GPF0(i), S3C_GPIO_PULL_NONE);
-        }
-
-        for (i = 0; i < 8; i++) {
-                s3c_gpio_cfgpin(S5PV210_GPF1(i), S3C_GPIO_SFN(2));
-                s3c_gpio_setpull(S5PV210_GPF1(i), S3C_GPIO_PULL_NONE);
-        }
-
-        for (i = 0; i < 8; i++) {
-                s3c_gpio_cfgpin(S5PV210_GPF2(i), S3C_GPIO_SFN(2));
-                s3c_gpio_setpull(S5PV210_GPF2(i), S3C_GPIO_PULL_NONE);
-        }
-        for (i = 0; i < 4; i++) {
-                s3c_gpio_cfgpin(S5PV210_GPF3(i), S3C_GPIO_SFN(2));
-                s3c_gpio_setpull(S5PV210_GPF3(i), S3C_GPIO_PULL_NONE);
-        }
-
-        /* mDNIe SEL: why we shall write 0x2 ? */
-        writel(0x2, S5P_MDNIE_SEL);
-
-#ifndef CONFIG_FB_S3C_TL2796
-        /* drive strength to max */
-        writel(0xffffffff, S5PV210_GPF0_BASE + 0xc);
-        writel(0xffffffff, S5PV210_GPF1_BASE + 0xc);
-        writel(0xffffffff, S5PV210_GPF2_BASE + 0xc);
-        writel(0x000000ff, S5PV210_GPF3_BASE + 0xc);
-#else
-        writel(0xC0, S5PV210_GPF0_BASE + 0xc);
-#endif
-}
-#endif
 
 
-
-#ifdef CONFIG_FB_S3C_LB070WV6
-static int lb070wv6_backlight_on(struct platform_device *pdev)
-{
-        int err;
-
-        err = gpio_request(S5PV210_GPD0(0), "GPD0_0");
-
-        if (err) {
-                printk(KERN_ERR "failed to request GPD0 for "
-                        "lcd backlight control\n");
-                return err;
-        }
-
-        gpio_direction_output(S5PV210_GPD0(0), 1);
-
-        s3c_gpio_cfgpin(S5PV210_GPD0(0), S5PV210_GPD_0_0_TOUT_0);
-
-        gpio_free(S5PV210_GPD0(0));
-
-        return 0;
-}
-
-
-static int lb070wv6_backlight_off(struct platform_device *pdev, int onoff)
-{
-        int err;
-
-        err = gpio_request(S5PV210_GPD0(0), "GPD0_0");
-
-        if (err) {
-                printk(KERN_ERR "failed to request GPD0 for "
-                                "lcd backlight control\n");
-                return err;
-        }
-
-        gpio_direction_output(S5PV210_GPD0(0), 0);
-        gpio_free(S5PV210_GPD0(0));
-
-        return 0;
-}
-#endif//jhk
 #ifdef CONFIG_FB_S3C_TL2796
 void lcd_cfg_gpio_early_suspend(void)
 {
@@ -1015,26 +805,7 @@ void lcd_cfg_gpio_late_resume(void)
 	    return;
 }
 #endif
-#ifdef CONFIG_FB_S3C_LB070WV6
-static int lb070wv6_reset_lcd(struct platform_device *pdev)
-{
-        return 0;
-}
 
-static struct s3c_platform_fb lb070wv6_fb_data __initdata = {
-        .hw_ver = 0x62,
-        .clk_name       = "sclk_fimd",
-        .nr_wins = 5,
-        .default_win = CONFIG_FB_S3C_DEFAULT_WINDOW,
-        .swap = FB_SWAP_WORD | FB_SWAP_HWORD,
-
-        .lcd = &lb070wv6,
-        .cfg_gpio       = lb070wv6_cfg_gpio,
-        .backlight_on   = lb070wv6_backlight_on,
-        .backlight_onoff    = lb070wv6_backlight_off,
-        .reset_lcd      = lb070wv6_reset_lcd,
-};
-#endif //jhk
 static int mango210_backlight_init(struct device *dev)
 {
 	//need to check the calling function for this function and remove the call.
@@ -1105,7 +876,7 @@ static struct platform_pwm_backlight_data smdk_backlight_data = {
 	.pwm_id  = 0,
 	.max_brightness = 255,
 	.dft_brightness = 155,
-	.pwm_period_ns  = 1000,//25000,
+	.pwm_period_ns  = 1000,//25000
 };
 
 static struct platform_device smdk_backlight_device = {
@@ -1123,22 +894,70 @@ static struct platform_device smdk_backlight_device = {
  * mangov210 button
  */
 static struct gpio_keys_button mango210_buttons[] = {
-        {
+	 {
+	        .gpio                   = S5PV210_GPH0(0),
+	        .code                   = 48, // BACK,
+	        .desc                   = "Back",
+	        .active_low             = 1,
+	        .debounce_interval      = 5,
+	        .type                   = EV_KEY,
+	 },	
+	 {
                 .gpio                   = S5PV210_GPH0(1),
-                .code                   = 48, // BACK,
-                .desc                   = "Back",
+                .code                   = 30, // HOME,
+                .desc                   = "Home",
                 .active_low             = 1,
                 .debounce_interval      = 5,
                 .type                   = EV_KEY,
         },
         {
                 .gpio                   = S5PV210_GPH0(2),
-                .code                   = 30, // HOME,
-                .desc                   = "Menu",
+                .code                   = 6, // LEFT,
+                .desc                   = "Left",
                 .active_low             = 1,
                 .debounce_interval      = 5,
                 .type                   = EV_KEY,
         },
+{
+	        .gpio                   = S5PV210_GPH0(3),
+	        .code                   = 2, // UP,
+	        .desc                   = "Up",
+	        .active_low             = 1,
+	        .debounce_interval      = 5,
+	        .type                   = EV_KEY,
+	 },	
+	 {
+                .gpio                   = S5PV210_GPH0(4),
+                .code                   = 4, // DOWN,
+                .desc                   = "Down",
+                .active_low             = 1,
+                .debounce_interval      = 5,
+                .type                   = EV_KEY,
+        },
+        {
+                .gpio                   = S5PV210_GPH0(5),
+                .code                   = 5, // RIGHT,
+                .desc                   = "Right",
+                .active_low             = 1,
+                .debounce_interval      = 5,
+                .type                   = EV_KEY,
+        },{
+	        .gpio                   = S5PV210_GPH0(6),
+	        .code                   = 46, // VOLUME_UP,
+	        .desc                   = "VolUp",
+	        .active_low             = 1,
+	        .debounce_interval      = 5,
+	        .type                   = EV_KEY,
+	 },	
+	 {
+                .gpio                   = S5PV210_GPH0(7),
+                .code                   = 18, // VOLUME_DOWN,
+                .desc                   = "VolDown",
+                .active_low             = 1,
+                .debounce_interval      = 5,
+                .type                   = EV_KEY,
+        },
+
 };
 
 static struct gpio_keys_platform_data mango210_buttons_data  = {
@@ -1382,18 +1201,18 @@ static struct platform_device *mango210_devices[] __initdata = {
 //#ifdef CONFIG_SND_S3C_SOC_AC97
 	&s5pv210_device_ac97,
 //#endif
+//#ifdef CONFIG_SND_S3C_SOC_PCM
+	&s5pv210_device_pcm0,
+//#endif
 	&s3c_device_rtc,
 	&s3c_device_ts,
 	&s3c_device_wdt,
 	&s5pv210_device_iis0,
 	&s5pv210_device_spdif,
 	&samsung_asoc_dma,
-#ifdef CONFIG_SMSC911X
-	&s5p_device_smsc911x,
-#endif
 	&mango210_buttons_device,
 	&mango210_leds_device,
-//	&mango210_lcd_lb070wv6,
+
 #ifdef CONFIG_HAVE_PWM
 	&s3c_device_timer[0],
 	&s3c_device_timer[1],
@@ -1720,10 +1539,10 @@ static struct s3c_platform_fimc fimc_plat_lsi = {
 			&s5ka3dfx,
 #endif
 #ifdef CONFIG_VIDEO_S5K4BA
-			&s5k4ba,
+//			&s5k4ba,
 #endif
 #ifdef CONFIG_VIDEO_S5K4EA
-			&s5k4ea,
+//			&s5k4ea,
 #endif
 	},
 	.hw_ver		= 0x43,
@@ -1738,37 +1557,7 @@ static struct s3c_platform_jpeg jpeg_plat __initdata = {
 };
 #endif
 
-static void __init mango210_smsc9220_init(void)
-{
-	unsigned int tmp;
 
-	gpio_request(S5PV210_MP01(1), "nCS1");
-	s3c_gpio_cfgpin(S5PV210_MP01(1), S3C_GPIO_SFN(2));
-	gpio_free(S5PV210_MP01(1));
-
-#define LAN9215_Tacs    (0x0)   // 0clk
-#define LAN9215_Tcos    (0x4)   // 4clk
-#define LAN9215_Tacc    (0xE)   // 14clk
-#define LAN9215_Tcoh    (0x1)   //(0x1) // 1clk
-#define LAN9215_Tah     (0x4)   //(0x4) // 4clk
-#define LAN9215_Tacp    (0x6)   //(0x6) // tobe zero    // 6clk
-#define LAN9215_PMC     (0x0)   // normal(1data)
-
-        tmp = ((LAN9215_Tacs<<28)+(LAN9215_Tcos<<24)+(LAN9215_Tacc<<16)
-                +(LAN9215_Tcoh<<12)+(LAN9215_Tah<<8)+(LAN9215_Tacp<<4)+(LAN9215_PMC));
-
-        __raw_writel(tmp, (S5P_SROM_BW + 0x08));
-
-        tmp = __raw_readl(S5P_SROM_BW);
-        tmp &= ~(0xf << 4);
-
-        tmp |= (0x1 << 7); // nWBE/nBE(for UB/LB) control for Memory Bank1(0=Not using UB/LB, 1=Using UB/LB)
-        tmp |= (0x1 << 6); // Wait enable control for Memory Bank1 (0=WAIT disable, 1=WAIT enable)
-        tmp |= (0x1 << 5); // Wait enable control for Memory Bank1 (0=WAIT disable, 1=WAIT enable)
-        tmp |= (0x1 << 4); // Data bus width control for Memory Bank1 (0=8-bit, 1=16-bit)
-        __raw_writel(tmp, S5P_SROM_BW);
-
-}
 
 static struct i2c_board_info mango210_i2c_devs0[] __initdata = {
 	{ I2C_BOARD_INFO("wm8960", 0x1a), },
@@ -1965,7 +1754,6 @@ static void __init mango210_machine_init(void)
 #ifdef CONFIG_FB_S3C_LTE480WV
 	s3c_fb_set_platdata(&lte480wv_fb_data);
 #endif//jhk
-	mango210_smsc9220_init();
 	platform_add_devices(mango210_devices, ARRAY_SIZE(mango210_devices));
 
 #ifdef CONFIG_ANDROID_PMEM
@@ -1975,7 +1763,9 @@ static void __init mango210_machine_init(void)
 	smdkc110_dm9000_set();
 #endif
 	mango210_sound_init();
-
+#if defined(CONFIG_FL210_ADC)
+//	s3c_adc_set_platdata(&s3c_adc_platform);
+#endif
 	s3c24xx_ts_set_platdata(&s3c_ts_platform);
 
 	s3c_i2c0_set_platdata(NULL);

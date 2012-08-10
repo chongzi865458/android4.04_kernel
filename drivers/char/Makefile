@@ -65,4 +65,12 @@ obj-$(CONFIG_RAMOOPS)		+= ramoops.o
 obj-$(CONFIG_JS_RTC)		+= js-rtc.o
 js-rtc-y = rtc.o
 
+obj-$(CONFIG_FL210_LEDS)	+= fl210_leds.o
+obj-$(CONFIG_FL210_HELLO_MODULE)	+= fl210_hello_module.o
+obj-$(CONFIG_FL210_BUTTONS)	+= fl210_buttons.o
+obj-$(CONFIG_FL210_BUZZER)	+= fl210_pwm.o
+obj-$(CONFIG_FL210_ADC)		+= fl210_adc.o
+obj-$(CONFIG_FL210_TEM) 	+= fl210_18b20.o
+
+
 obj-$(CONFIG_S3C_MEM)           += s3c_mem.o
