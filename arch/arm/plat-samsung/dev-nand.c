@@ -16,7 +16,10 @@
 #include <mach/map.h>
 #include <plat/devs.h>
 #include <plat/nand.h>
+/* NAND //jhk*/
+#define S3C_PA_NAND (0x70200000)
 
+/*
 static struct resource s3c_nand_resource[] = {
 	[0] = {
 		.start = S3C_PA_NAND,
@@ -26,14 +29,15 @@ static struct resource s3c_nand_resource[] = {
 };
 
 struct platform_device s3c_device_nand = {
-	.name		  = "s3c2410-nand",
+//	.name		  = "s3c2410-nand",
+	.name		  = "s5pv210-nand",
 	.id		  = -1,
 	.num_resources	  = ARRAY_SIZE(s3c_nand_resource),
 	.resource	  = s3c_nand_resource,
 };
 
 EXPORT_SYMBOL(s3c_device_nand);
-
+*/
 /**
  * s3c_nand_copy_set() - copy nand set data
  * @set: The new structure, directly copied from the old.

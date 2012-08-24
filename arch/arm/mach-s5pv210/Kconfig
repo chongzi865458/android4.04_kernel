@@ -8,9 +8,10 @@
 # Configuration options for the S5PV210/S5PC110
 
 if ARCH_S5PV210
-
+# jhk add s3c_dev_nand
 config CPU_S5PV210
 	bool
+
 	select S3C_PL330_DMA
 	select S5P_EXT_INT
 	select S5P_HRT
@@ -156,6 +157,7 @@ config MACH_SMDKV210
         select HAVE_PWM
         select SAMSUNG_DEV_PWM
         select SAMSUNG_DEV_TS
+	select S3C_DEV_NAND
         select S5PV210_SETUP_FB_24BPP
         select S5PV210_SETUP_I2C1
         select S5PV210_SETUP_I2C2

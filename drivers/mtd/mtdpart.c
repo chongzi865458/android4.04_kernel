@@ -672,6 +672,7 @@ int add_mtd_partitions(struct mtd_info *master,
 
 	return 0;
 }
+EXPORT_SYMBOL(add_mtd_partitions);//jhk
 
 static DEFINE_SPINLOCK(part_parser_lock);
 static LIST_HEAD(part_parsers);

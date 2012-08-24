@@ -49,6 +49,9 @@ struct mtd_partition {
 
 struct mtd_info;
 
+int add_mtd_partitions(struct mtd_info *, const struct mtd_partition *, int);//jhk
+int del_mtd_partitions(struct mtd_info *);//jhk
+
 /*
  * Functions dealing with the various ways of partitioning the space
  */

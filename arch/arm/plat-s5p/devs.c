@@ -85,6 +85,21 @@ static int __init ethaddr_setup(char *line)
 }
 __setup("ethaddr=", ethaddr_setup);
 #endif
+/* NAND Controller by jhk */
+static struct resource s3c_nand_resource[] = {
+	[0] = {
+		.start	= S5P_PA_NAND,
+		.end	= S5P_PA_NAND + S5P_SZ_NAND - 1,
+		.flags	= IORESOURCE_MEM,
+	}
+};
+
+struct platform_device s3c_device_nand = {
+	.name		= "s5pv210-nand",
+	.id		= -1,
+	.num_resources	= ARRAY_SIZE(s3c_nand_resource),
+	.resource	= s3c_nand_resource,
+};
 #if defined(CONFIG_VIDEO_FIMC) || defined(CONFIG_CPU_FREQ) /* TODO: use existing dev */
 static struct resource s3c_fimc0_resource[] = {
 	[0] = {

@@ -1204,6 +1204,9 @@ static struct platform_device *mango210_devices[] __initdata = {
 //#ifdef CONFIG_SND_S3C_SOC_PCM
 	&s5pv210_device_pcm0,
 //#endif
+#if defined CONFIG_MTD_NAND_S3C
+	&s3c_device_nand, //jhk
+#endif
 	&s3c_device_rtc,
 	&s3c_device_ts,
 	&s3c_device_wdt,
@@ -1643,6 +1646,9 @@ static void __init mango210_map_io(void)
 	s3c24xx_init_uarts(mango210_uartcfgs, ARRAY_SIZE(mango210_uartcfgs));
 #ifndef CONFIG_S5P_HIGH_RES_TIMERS
 	s5p_set_timer_source(S5P_PWM2, S5P_PWM4);
+#endif
+#ifdef CONFIG_MTD_NAND_S3C
+	s3c_device_nand.name = "s5pv210-nand";
 #endif
 	s5p_reserve_bootmem(s5pv210_media_devs,
                         ARRAY_SIZE(s5pv210_media_devs), S5P_RANGE_MFC);
