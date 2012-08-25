@@ -101,7 +101,7 @@ struct mtd_partition s3c_partition_info[] = {
 	{
 		.name		= "system",
 		.offset		= MTDPART_OFS_APPEND,
-		.size		= (110*SZ_1M),
+		.size		= (190*SZ_1M),
 	},
 	{
 		.name		= "cache",
