@@ -44,6 +44,7 @@
 #include <mach/spi-clocks.h>
 #include <mach/regs-fb.h>
 #include <mach/gpio.h>
+#include <mach/ts.h>
 
 #ifdef CONFIG_VIDEO_S5K4BA
 #include <media/s5k4ba_platform.h>
@@ -394,7 +395,15 @@ static struct platform_device mango210_b_pwr_5v = {
         },
 };
 #endif
-
+#ifdef CONFIG_TOUCHSCREEN_S3C
+static struct s3c_ts_mach_info s3c_ts_platform __initdata = {
+	.delay                  = 10000,
+	.presc                  = 49,
+	.oversampling_shift     = 2,
+	.resol_bit              = 12,
+	.s3c_adc_con            = ADC_TYPE_2,
+};
+#endif
 
 #ifdef CONFIG_BATTERY_S3C
 struct platform_device sec_device_battery = {
@@ -1625,7 +1634,7 @@ static struct spi_board_info s3c_spi_devs[] __initdata = {
 };
 
 #endif
-
+/*
 static struct s3c2410_ts_mach_info s3c_ts_platform __initdata = {
 	.delay			= 10000,
 	.presc			= 49,
@@ -1637,7 +1646,7 @@ static struct s3c2410_ts_mach_info s3c_ts_platform __initdata = {
         },
 
 };
-
+*/
 static void __init mango210_map_io(void)
 {
 	s5p_init_io(NULL, 0, S5P_VA_CHIPID);
@@ -1772,8 +1781,10 @@ static void __init mango210_machine_init(void)
 #if defined(CONFIG_FL210_ADC)
 //	s3c_adc_set_platdata(&s3c_adc_platform);
 #endif
-	s3c24xx_ts_set_platdata(&s3c_ts_platform);
-
+//	s3c24xx_ts_set_platdata(&s3c_ts_platform);
+#if defined(CONFIG_TOUCHSCREEN_S3C)
+	s3c_ts_set_platdata(&s3c_ts_platform);
+#endif
 	s3c_i2c0_set_platdata(NULL);
 	s3c_i2c1_set_platdata(NULL);
 	s3c_i2c2_set_platdata(NULL);

@@ -46,4 +46,5 @@ endif
 endif
 obj-$(CONFIG_S5P_DEV_MFC)	+= dev-mfc.o
 obj-$(CONFIG_S5P_SETUP_MFC)	+= setup-mfc.o
+obj-$(CONFIG_TOUCHSCREEN_S3C)   += dev-ts.o
 obj-$(CONFIG_S5P_DEV_USB_HSDEVICE) += dev-hsdevice.o

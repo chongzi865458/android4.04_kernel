@@ -143,7 +143,18 @@ config TOUCHSCREEN_DA9034
 	help
 	  Say Y here to enable the support for the touchscreen found
 	  on Dialog Semiconductor DA9034 PMIC.
+config TOUCHSCREEN_S3C
+        tristate "S3C touchscreen driver"
+        depends on ARCH_S3C2410 || ARCH_S3C64XX || ARCH_S5PV2XX || ARCH_S5P64XX || CPU_S5PV210 || CPU_S5PC110
+        default y
+        help
+          Say Y here to enable the driver for the touchscreen on the
+          S3C SMDK board.
 
+          If unsure, say N.
+
+          To compile this driver as a module, choose M here: the
+          module will be called s3c_ts.
 config TOUCHSCREEN_FORLINX
 	tristate "forlinx multi-touch driver"
 	depends on CPU_S5PV210

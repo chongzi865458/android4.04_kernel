@@ -64,3 +64,4 @@ obj-$(CONFIG_TOUCHSCREEN_TPS6507X)	+= tps6507x-ts.o
 obj-$(CONFIG_TOUCHSCREEN_EGALAX)        += egalax_i2c.o
 obj-$(CONFIG_TOUCHSCREEN_FORLINX) 	+= forlinx_ts.o
 obj-$(CONFIG_TOUCHSCREEN_FT5306)	+=ft5x0x_i2c_ts.o
+obj-$(CONFIG_TOUCHSCREEN_S3C)           += s3c-ts.o
