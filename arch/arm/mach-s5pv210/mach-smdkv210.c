@@ -900,7 +900,7 @@ static struct platform_device smdk_backlight_device = {
 #endif
 
 /*
- * mangov210 button
+ * forlinx210 button
  */
 static struct gpio_keys_button mango210_buttons[] = {
 	 {
@@ -1195,7 +1195,7 @@ static void __init mango210_sound_init(void)
 }
 
 static struct platform_device *mango210_devices[] __initdata = {
-	&s3c_device_adc,
+//	&s3c_device_adc,
 	&s3c_device_fb,
 	&s3c_device_hsmmc0,
 	&s3c_device_hsmmc1,

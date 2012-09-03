@@ -76,6 +76,8 @@ struct mtd_partition s3c_partition_info[] = {
 		.size		= MTDPART_SIZ_FULL,
 	}
 #endif
+
+
 	{
 		.name		= "misc",
 		.offset		= (768*SZ_1K),          /* for bootloader */
@@ -101,7 +103,7 @@ struct mtd_partition s3c_partition_info[] = {
 	{
 		.name		= "system",
 		.offset		= MTDPART_OFS_APPEND,
-		.size		= (190*SZ_1M),
+		.size		= (170*SZ_1M),
 	},
 	{
 		.name		= "cache",
@@ -113,6 +115,9 @@ struct mtd_partition s3c_partition_info[] = {
 		.offset		= MTDPART_OFS_APPEND,
 		.size		= MTDPART_SIZ_FULL,
 	}
+
+
+
 };
 
 struct s3c_nand_mtd_info s3c_nand_mtd_part_info = {

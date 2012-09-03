@@ -28,7 +28,7 @@ obj-$(CONFIG_SAMSUNG_IRQ_VIC_TIMER) += irq-vic-timer.o
 
 # ADC
 
-obj-$(CONFIG_S3C_ADC)	+= adc.o
+#obj-$(CONFIG_S3C_ADC)	+= adc.o
 
 # devices
 
