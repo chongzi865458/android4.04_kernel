@@ -231,13 +231,14 @@ static void ts_poscheck(struct work_struct *work)
 				input_report_abs(tsdata->input, ABS_MT_POSITION_X, posx[i]);
 				input_report_abs(tsdata->input, ABS_MT_POSITION_Y, posy[i]);
 				input_report_key(tsdata->input, BTN_TOUCH , 1);    // pressed jhk
-//				input_report_key(tsdata->input, BTN_TOUCH , 0);    // realse  jhk
+
 				input_mt_sync(tsdata->input);
 			}
 		}
 		else
 		{
 			input_report_abs(tsdata->input, ABS_MT_TOUCH_MAJOR, 0);
+			input_report_key(tsdata->input, BTN_TOUCH , 0);    // realse  jhk
 			input_mt_sync(tsdata->input);	
 //			printk("@@@@@@@@@@@@@@@@@@@@@@styleup\n");
 		}

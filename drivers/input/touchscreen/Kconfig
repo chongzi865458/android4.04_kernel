@@ -155,6 +155,17 @@ config TOUCHSCREEN_S3C
 
           To compile this driver as a module, choose M here: the
           module will be called s3c_ts.
+config TOUCHSCREEN_NEW
+        bool "new flip touch"
+        depends on TOUCHSCREEN_S3C
+        default y
+        help
+          Say Y here to enable the driver for the new version touchscreen on the
+          S3C SMDK board.
+
+          Say N here to enable the driver for the old version touchscreen on the
+          S3C SMDK board.
+
 config TOUCHSCREEN_FORLINX
 	tristate "forlinx multi-touch driver"
 	depends on CPU_S5PV210

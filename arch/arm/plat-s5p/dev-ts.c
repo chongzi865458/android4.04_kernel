@@ -13,12 +13,15 @@
 
 #include <linux/kernel.h>
 #include <linux/platform_device.h>
-#include <linux/slab.h>
+//#include <linux/slab.h>
 #include <mach/map.h>
 #include <asm/irq.h>
 #include <plat/devs.h>
 #include <plat/cpu.h>
 #include <mach/ts.h>
+#include <linux/proc_fs.h>
+
+
 
 /* Touch srcreen */
 static struct resource s3c_ts_resource[] = {

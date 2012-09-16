@@ -2,17 +2,20 @@ Clean Kernel
 Make Kernel Configuration
 make -j3
 
-scripts/kconfig/conf --silentoldconfig Kconfig
   CHK     include/linux/version.h
   CHK     include/generated/utsrelease.h
 make[1]: `include/generated/mach-types.h' is up to date.
   CALL    scripts/checksyscalls.sh
   CHK     include/generated/compile.h
-  CC      arch/arm/plat-s5p/devs.o
-  LD      arch/arm/plat-s5p/built-in.o
+  CC      drivers/input/touchscreen/s3c-ts.o
+drivers/input/touchscreen/s3c-ts.c: In function 's3c_ts_probe':
+drivers/input/touchscreen/s3c-ts.c:341: warning: 'ret' may be used uninitialized in this function
+  LD      drivers/input/touchscreen/built-in.o
+  LD      drivers/input/built-in.o
+  LD      drivers/built-in.o
   LD      vmlinux.o
   MODPOST vmlinux.o
-WARNING: modpost: Found 3 section mismatch(es).
+WARNING: modpost: Found 4 section mismatch(es).
 To see full details build your kernel with:
 'make CONFIG_DEBUG_SECTION_MISMATCH=y'
   GEN     .version
@@ -29,9 +32,9 @@ To see full details build your kernel with:
   LD      vmlinux
   SYSMAP  System.map
   SYSMAP  .tmp_System.map
-  OBJCOPY arch/arm/boot/Image
   Building modules, stage 2.
-  MODPOST 3 modules
+  OBJCOPY arch/arm/boot/Image
+  MODPOST 9 modules
   Kernel: arch/arm/boot/Image is ready
   GZIP    arch/arm/boot/compressed/piggy.gzip
   SHIPPED arch/arm/boot/compressed/lib1funcs.S
@@ -42,4 +45,4 @@ To see full details build your kernel with:
   Kernel: arch/arm/boot/zImage is ready
 Copy Kernel Image to Image Folder
 Copy Kernel Image to Install Directory
-Total compile time is 2 minutes 4 seconds
+Total compile time is 1 minutes 26 seconds

@@ -509,7 +509,7 @@ static struct s5p_media_device s5pv210_media_devs[] = {
 		.memsize = S5PV210_VIDEO_SAMSUNG_MEMSIZE_G2D,
 		.paddr = 0,
 	},
-#if 1
+#ifdef CONFIG_ANDROID
         [9] = {
                 .id = S5P_MDEV_PMEM,
                 .name = "pmem",
@@ -702,7 +702,7 @@ static int lte480wv_backlight_on(struct platform_device *pdev)
 {
 	int err;
 
-	err = gpio_request(S5PV210_GPD0(0), "GPD0");
+	err = gpio_request(S5PV210_GPD0(1), "GPD1");
 
 	if (err) {
 		printk(KERN_ERR "failed to request GPD0 for "
@@ -710,11 +710,11 @@ static int lte480wv_backlight_on(struct platform_device *pdev)
 		return err;
 	}
 
-	gpio_direction_output(S5PV210_GPD0(0), 0);
+	gpio_direction_output(S5PV210_GPD0(1), 0);
 
-	s3c_gpio_cfgpin(S5PV210_GPD0(0), S5PV210_GPD_0_0_TOUT_0);
+	s3c_gpio_cfgpin(S5PV210_GPD0(1), S5PV210_GPD_0_1_TOUT_1);
 
-	gpio_free(S5PV210_GPD0(0));
+	gpio_free(S5PV210_GPD0(1));
 
 	return 0;
 }
@@ -723,16 +723,16 @@ static int lte480wv_backlight_off(struct platform_device *pdev, int onoff)
 {
 	int err;
 
-	err = gpio_request(S5PV210_GPD0(0), "GPD0");
+	err = gpio_request(S5PV210_GPD0(1), "GPD0");
 	if (err) {
 		printk(KERN_ERR "failed to request GPD0 for "
 				"lcd backlight control\n");
 		return err;
 	}
 
-	gpio_direction_output(S5PV210_GPD0(0), 0);
+	gpio_direction_output(S5PV210_GPD0(1), 0);
 
-	gpio_free(S5PV210_GPD0(0));
+	gpio_free(S5PV210_GPD0(1));
 	return 0;
 }
 
@@ -1217,7 +1217,10 @@ static struct platform_device *mango210_devices[] __initdata = {
 	&s3c_device_nand, //jhk
 #endif
 	&s3c_device_rtc,
+#ifdef CONFIG_TOUCHSCREEN_S3C
 	&s3c_device_ts,
+#endif
+
 	&s3c_device_wdt,
 	&s5pv210_device_iis0,
 	&s5pv210_device_spdif,

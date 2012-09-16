@@ -58,21 +58,19 @@
 #include <mach/hardware.h>
 
 #include <mach/regs-adc.h>
-#include <mach/ts.h>
+#include <mach/ts-s3c.h>
+#include <mach/map.h>
 #include <mach/irqs.h>
 
-#define CONFIG_TOUCHSCREEN_S3C_DEBUG
-//#undef CONFIG_TOUCHSCREEN_S3C_DEBUG
-#define CONFIG_ANDROID
+#include "ts_filter_chain.h"
+#include "ts_filter_group.h"
+#include "ts_filter_median.h"
+#include "ts_filter_mean.h"
+#include "ts_filter_linear.h"
+#include "ts_filter_zoom.h"
 
-#ifdef CONFIG_CPU_S5PV210_EVT1_abc
-#define        X_COOR_MIN      180
-#define        X_COOR_MAX      4000
-#define        X_COOR_FUZZ     32
-#define        Y_COOR_MIN      300
-#define        Y_COOR_MAX      3900
-#define        Y_COOR_FUZZ     32
-#endif /* CONFIG_CPU_S5PV210_EVT1_abc */
+#define CONFIG_TOUCHSCREEN_S3C_DEBUG
+#undef CONFIG_TOUCHSCREEN_S3C_DEBUG
 
 /* For ts->dev.id.version */
 #define S3C_TSVERSION	0x0101
@@ -94,103 +92,142 @@ void ts_late_resume(struct early_suspend *h);
 
 /* Touchscreen default configuration */
 struct s3c_ts_mach_info s3c_ts_default_cfg __initdata = {
-		.delay =		30000,
-		.presc = 		49,
+		.delay =		10000,
+		.presc = 		255,
 		.oversampling_shift = 	2,
 		.resol_bit = 		10
 };
 
 /*
+ * Touchscreen configuration.
+ */
+const static struct ts_filter_group_configuration config_ts_group = {
+	.length = 12,
+	.close_enough = 10,
+	.threshold = 6,
+	.attempts = 10,
+};
+
+const static struct ts_filter_median_configuration config_ts_median = {
+	.extent = 5,
+	.decimation_below = 3,
+	.decimation_threshold = 2 * 3,
+	.decimation_above = 2,
+};
+
+const static struct ts_filter_mean_configuration config_ts_mean = {
+	.length = 2,
+};
+
+const static struct ts_filter_linear_configuration config_ts_linear = {
+	/* .constants = {1, 0, 0, 0, 1, 0, 1}, */
+	.constants = {16017, 0, 2739156, 23, 17056, 1639328, 65536},
+	.coord0 = 0,
+	.coord1 = 1,
+};
+
+const static struct ts_filter_zoom_configuration config_ts_zoom = {
+	.constants = {0},
+	.coord0 = 0,
+	.coord1 = 1,
+};
+
+const static struct ts_filter_chain_configuration filter_configuration[] =
+{
+/*	{&ts_filter_group_api,	&config_ts_group.config}, */
+/*	{&ts_filter_median_api,	&config_ts_median.config}, */
+	{&ts_filter_mean_api,	&config_ts_mean.config},
+	{&ts_filter_linear_api,	&config_ts_linear.config},
+	{&ts_filter_zoom_api,	&config_ts_zoom.config},
+	{NULL, NULL},
+};
+
+/*
  * Definitions & global arrays.
  */
-static char *s3c_ts_name = "S5P TouchScreen";
+//static char *s3c_ts_name = "S5P TouchScreen";
+static char *s3c_ts_name = "s3c-ts";
 static void __iomem 		*ts_base;
 static struct resource		*ts_mem;
 static struct resource		*ts_irq;
 static struct clk		*ts_clock;
 static struct s3c_ts_info 	*ts;
 
+int s3c_adc_in_use = 0;
+EXPORT_SYMBOL(s3c_adc_in_use);
+
+static int ts_filter_fixed(unsigned int * buf)
+{
+#define XMIN		400
+#define XMAX 	15800
+#define YMIN 	1350
+#define YMAX 	14800
+
+	buf[0] = (buf[0] - XMIN) * 800 / (XMAX - XMIN);
+	buf[1] = (buf[1] - YMIN) * 480 / (YMAX - YMIN);
+
+	return 1;
+}
+
 static void touch_timer_fire(unsigned long data)
 {
 	unsigned long data0;
 	unsigned long data1;
 	int updown;
-#ifdef CONFIG_ANDROID
-	int x,y;
-#ifndef CONFIG_CPU_S5PV210_EVT1_abc
-
-
-	int a0,a1,a2,a3,a4,a5,a6;
-#ifdef CONFIG_TOUCHSCREEN_NEW
-	a0=11;
-	a1=3004;
-	a2=-9542528;
-	a3=-4300;
-	a4=4;
-	a5=61817184;
-	a6=65536;
-#else /* CONFIG_TOUCHSCREEN_NEW */
-	a0=3337;
-	a1=-9;
-	a2=-1000388;
-	a3=-11;
-	a4=-2190;
-	a5=33470324;
-	a6=65536;
-#endif /* CONFIG_TOUCHSCREEN_NEW */
-#endif /* !CONFIG_CPU_S5PV210_EVT1_abc */
-#endif /* CONFIG_ANDROID */
+	int buf[3];
 
 	data0 = readl(ts_base+S3C_ADCDAT0);
 	data1 = readl(ts_base+S3C_ADCDAT1);
-
 	updown = (!(data0 & S3C_ADCDAT0_UPDOWN)) && (!(data1 & S3C_ADCDAT1_UPDOWN));
+	if(updown)
+		s3c_adc_in_use = 1;
+	else
+		s3c_adc_in_use = 0;
 
-	if (updown) {
-		if (ts->count) {
+	if(updown)
+	{
+		if (ts->count)
+		{
+			buf[1] = ts->xp;
+			buf[2] = ts->yp;
 
-#ifdef CONFIG_ANDROID	
-#ifndef CONFIG_CPU_S5PV210_EVT1_abc
-			x=(int) ts->xp;
-			y=(int) ts->yp;
+			//switch (ts_filter_chain_feed(ts->chain, &buf[1]))
+			switch (ts_filter_fixed(&buf[1]))
+			{
+			case 0:
+				/* The filter wants more points. */
+				break;
+			case 1:
+				/* We have a point from the filters or no filtering enabled. */
 
-			ts->xp=(long) ((a2+(a0*x)+(a1*y))/a6);
-			ts->yp=(long) ((a5+(a3*x)+(a4*y))/a6);
-			//printk("x=%d, y=%d\n",(int) ts->xp,(int) ts->yp);
+#ifdef CONFIG_TOUCHSCREEN_S3C_DEBUG
+				printk("debug: x=%d, y=%d\r\n", buf[1], buf[2]);
+#endif
+				ts->xp = buf[1];
+				ts->yp = buf[2];
 
-			if (ts->xp!=ts->xp_old || ts->yp!=ts->yp_old) {
-				input_report_abs(ts->dev, ABS_X, ts->xp);
-				input_report_abs(ts->dev, ABS_Y, ts->yp);
-				input_report_abs(ts->dev, ABS_Z, 0);
+				if(ts->xp!=ts->xp_old || ts->yp!=ts->yp_old)
+				{
+					input_report_abs(ts->dev, ABS_X, ts->xp);
+					input_report_abs(ts->dev, ABS_Y, ts->yp);
+					input_report_abs(ts->dev, ABS_Z, 0);
 
-				input_report_key(ts->dev, BTN_TOUCH, 1);
-				input_report_abs(ts->dev, ABS_PRESSURE, 1);
-				input_sync(ts->dev);
-			}
-			ts->xp_old=ts->xp;
-			ts->yp_old=ts->yp;
-#else /* !CONFIG_CPU_S5PV210_EVT1_abc */
-			x=(int) ts->xp/ts->count;
-			y=(int) ts->yp/ts->count;
-#ifdef CONFIG_FB_S3C_LTE480WV
-			y = 4000 - y;
-#endif /* CONFIG_FB_S3C_LTE480WV */
-			printk("Cordinates x=%d, y=%d\n",(int) x,(int) y);
-			input_report_abs(ts->dev, ABS_X, x);
-			input_report_abs(ts->dev, ABS_Y, y);
-			input_report_abs(ts->dev, ABS_Z, 0);
-			input_report_key(ts->dev, BTN_TOUCH, 1);
-			input_sync(ts->dev);
-#endif /* !CONFIG_CPU_S5PV210_EVT1_abc */
-#else /* CONFIG_ANDROID */
-//			printk("x=%d,y=%d\n",(int) ts->xp,(int) ts->yp);
-			input_report_abs(ts->dev, ABS_X, ts->xp);
-			input_report_abs(ts->dev, ABS_Y, ts->yp);
+					input_report_key(ts->dev, BTN_TOUCH, 1);
+					//input_report_abs(ts->dev, ABS_PRESSURE, 1);
+					input_sync(ts->dev);
+				}
+				ts->xp_old=ts->xp;
+				ts->yp_old=ts->yp;
 
-			input_report_key(ts->dev, BTN_TOUCH, 1);
-			input_report_abs(ts->dev, ABS_PRESSURE, 1);
-			input_sync(ts->dev);
-#endif /* CONFIG_ANDROID */
+				break;
+			case -1:
+				/* Error. Ignore the event. */
+				ts_filter_chain_clear(ts->chain);
+				break;
+			default:
+				printk("Invalid ts_filter_chain_feed return value.\n");
+				break;
+			};
 		}
 
 		ts->xp = 0;
@@ -199,22 +236,17 @@ static void touch_timer_fire(unsigned long data)
 
 		writel(S3C_ADCTSC_PULL_UP_DISABLE | AUTOPST, ts_base+S3C_ADCTSC);
 		writel(readl(ts_base+S3C_ADCCON) | S3C_ADCCON_ENABLE_START, ts_base+S3C_ADCCON);
-	} else {
+	}
+	else
+	{
 		ts->count = 0;
-#ifdef CONFIG_ANDROID
-#ifdef CONFIG_CPU_S5PV210_EVT1_abc
-		input_report_abs(ts->dev, ABS_X, ts->xp);
-		input_report_abs(ts->dev, ABS_Y, ts->yp);
-#else /* CONFIG_CPU_S5PV210_EVT1_abc */
+		ts_filter_chain_clear(ts->chain);
+
 		input_report_abs(ts->dev, ABS_X, ts->xp_old);
 		input_report_abs(ts->dev, ABS_Y, ts->yp_old);
-#endif /* CONFIG_CPU_S5PV210_EVT1_abc */
 		input_report_abs(ts->dev, ABS_Z, 0);
-#endif /* CONFIG_ANDROID */
 		input_report_key(ts->dev, BTN_TOUCH, 0);
-#ifndef CONFIG_ANDROID
 		input_report_abs(ts->dev, ABS_PRESSURE, 0);
-#endif /* !CONFIG_ANDROID */
 		input_sync(ts->dev);
 
 		writel(WAIT4INT(0), ts_base+S3C_ADCTSC);
@@ -234,8 +266,11 @@ static irqreturn_t stylus_updown(int irqno, void *param)
 	data1 = readl(ts_base+S3C_ADCDAT1);
 
 	updown = (!(data0 & S3C_ADCDAT0_UPDOWN)) && (!(data1 & S3C_ADCDAT1_UPDOWN));
+	if(updown)
+		s3c_adc_in_use = 1;
+	else
+		s3c_adc_in_use = 0;
 
-	//printk("****************down*****************\n");
 	/* TODO we should never get an interrupt with updown set while
 	 * the timer is running, but maybe we ought to verify that the
 	 * timer isn't running anyways. */
@@ -260,25 +295,11 @@ static irqreturn_t stylus_action(int irqno, void *param)
 	data1 = readl(ts_base+S3C_ADCDAT1);
 
 	if (ts->resol_bit == 12) {
-#if defined(CONFIG_TOUCHSCREEN_NEW)
-		ts->yp += S3C_ADCDAT0_XPDATA_MASK_12BIT - (data0 & S3C_ADCDAT0_XPDATA_MASK_12BIT);
-		ts->xp += S3C_ADCDAT1_YPDATA_MASK_12BIT - (data1 & S3C_ADCDAT1_YPDATA_MASK_12BIT);
-#else /* CONFIG_TOUCHSCREEN_NEW */
-#ifndef CONFIG_CPU_S5PV210_EVT1_abc
-		ts->xp += data0 & S3C_ADCDAT0_XPDATA_MASK_12BIT;
-#else /* !CONFIG_CPU_S5PV210_EVT1_abc */
 		ts->xp += S3C_ADCDAT0_XPDATA_MASK_12BIT - (data0 & S3C_ADCDAT0_XPDATA_MASK_12BIT);
-#endif /* !CONFIG_CPU_S5PV210_EVT1_abc */
-		ts->yp += data1 & S3C_ADCDAT1_YPDATA_MASK_12BIT;
-#endif /* CONFIG_TOUCHSCREEN_NEW */
+		ts->yp += (data1 & S3C_ADCDAT1_YPDATA_MASK_12BIT);
 	} else {
-#if defined(CONFIG_TOUCHSCREEN_NEW)
-		ts->yp += S3C_ADCDAT0_XPDATA_MASK - (data0 & S3C_ADCDAT0_XPDATA_MASK);
-		ts->xp += S3C_ADCDAT1_YPDATA_MASK - (data1 & S3C_ADCDAT1_YPDATA_MASK);
-#else /* CONFIG_TOUCHSCREEN_NEW */
-		ts->xp += data0 & S3C_ADCDAT0_XPDATA_MASK;
-		ts->yp += data1 & S3C_ADCDAT1_YPDATA_MASK;
-#endif /* CONFIG_TOUCHSCREEN_NEW */
+		ts->xp += S3C_ADCDAT0_XPDATA_MASK - (data0 & S3C_ADCDAT0_XPDATA_MASK);
+		ts->yp += S3C_ADCDAT1_YPDATA_MASK - (data1 & S3C_ADCDAT1_YPDATA_MASK);
 	}
 
 	ts->count++;
@@ -287,7 +308,7 @@ static irqreturn_t stylus_action(int irqno, void *param)
 		writel(S3C_ADCTSC_PULL_UP_DISABLE | AUTOPST, ts_base+S3C_ADCTSC);
 		writel(readl(ts_base+S3C_ADCCON) | S3C_ADCCON_ENABLE_START, ts_base+S3C_ADCCON);
 	} else {
-		mod_timer(&touch_timer, jiffies+5);
+		mod_timer(&touch_timer, jiffies+1);
 		writel(WAIT4INT(1), ts_base+S3C_ADCTSC);
 	}
 
@@ -316,7 +337,8 @@ static int __init s3c_ts_probe(struct platform_device *pdev)
 	struct device *dev;
 	struct input_dev *input_dev;
 	struct s3c_ts_mach_info *s3c_ts_cfg;
-	int ret, size, err;
+	void __iomem * ts_base0;
+	int ret, size;
 	int irq_flags = 0;
 
 	dev = &pdev->dev;
@@ -366,6 +388,10 @@ static int __init s3c_ts_probe(struct platform_device *pdev)
 		switch (s3c_ts_cfg->s3c_adc_con) {
 		case ADC_TYPE_2:
 			writel(readl(ts_base+S3C_ADCCON)|S3C_ADCCON_RESSEL_12BIT, ts_base+S3C_ADCCON);
+			
+			ts_base0 = ioremap(S3C_PA_ADC, SZ_4K);
+			writel(readl(ts_base0 + S3C_ADCCON) | (0x0 << 17), ts_base0 + S3C_ADCCON);
+			iounmap(ts_base0);
 			break;
 
 		case ADC_TYPE_1:
@@ -394,42 +420,11 @@ static int __init s3c_ts_probe(struct platform_device *pdev)
 	ts->dev->keybit[BIT_WORD(BTN_TOUCH)] = BIT_MASK(BTN_TOUCH);
 
 	if (s3c_ts_cfg->resol_bit==12) {
-#ifdef CONFIG_ANDROID
-#ifndef CONFIG_CPU_S5PV210_EVT1_abc
 		input_set_abs_params(ts->dev, ABS_X, 0, 800, 0, 0);
 		input_set_abs_params(ts->dev, ABS_Y, 0, 480, 0, 0);
-		//  input_set_abs_params(ts->dev, ABS_Z, 0, 0, 0, 0);
-
-		set_bit(0,ts->dev->evbit);
-		set_bit(1,ts->dev->evbit);
-		set_bit(2,ts->dev->evbit);
-		set_bit(3,ts->dev->evbit);
-		set_bit(5,ts->dev->evbit);
-
-		set_bit(0,ts->dev->relbit);
-		set_bit(1,ts->dev->relbit);
-
-		set_bit(0,ts->dev->absbit);
-		set_bit(1,ts->dev->absbit);
-		set_bit(2,ts->dev->absbit);
-
-		set_bit(0,ts->dev->swbit);
-
-		for (err=0; err < 512; err++)
-			set_bit(err,ts->dev->keybit);
-
-		input_event(ts->dev,5,0,1);
-#else /* !CONFIG_CPU_S5PV210_EVT1_abc */
-		input_set_abs_params(ts->dev, ABS_X, X_COOR_MIN, X_COOR_MAX, X_COOR_FUZZ, 0);
-		input_set_abs_params(ts->dev, ABS_Y, Y_COOR_MIN, Y_COOR_MAX, Y_COOR_FUZZ, 0);
-#endif /* !CONFIG_CPU_S5PV210_EVT1_abc */
-#else /* CONFIG_ANDROID */
-		input_set_abs_params(ts->dev, ABS_X, 0, 0xFFF, 0, 0);
-		input_set_abs_params(ts->dev, ABS_Y, 0, 0xFFF, 0, 0);
-#endif /* CONFIG_ANDROID */
 	} else {
-		input_set_abs_params(ts->dev, ABS_X, 0, 0x3FF, 0, 0);
-		input_set_abs_params(ts->dev, ABS_Y, 0, 0x3FF, 0, 0);
+		input_set_abs_params(ts->dev, ABS_X, 0, 800, 0, 0);
+		input_set_abs_params(ts->dev, ABS_Y, 0, 480, 0, 0);
 	}
 
 	input_set_abs_params(ts->dev, ABS_PRESSURE, 0, 1, 0, 0);
@@ -446,6 +441,13 @@ static int __init s3c_ts_probe(struct platform_device *pdev)
 	ts->shift = s3c_ts_cfg->oversampling_shift;
 	ts->resol_bit = s3c_ts_cfg->resol_bit;
 	ts->s3c_adc_con = s3c_ts_cfg->s3c_adc_con;
+
+	/* create the filter chain set up for the 2 coordinates we produce */
+	ts->chain = ts_filter_chain_create(pdev, filter_configuration, 2);
+
+	if (IS_ERR(ts->chain))
+		goto err_chain;
+	ts_filter_chain_clear(ts->chain);
 
 #ifdef CONFIG_HAS_EARLYSUSPEND
 	ts->early_suspend.level = EARLY_SUSPEND_LEVEL_BLANK_SCREEN + 1;
@@ -494,14 +496,14 @@ static int __init s3c_ts_probe(struct platform_device *pdev)
 		goto fail;
 	}
 
-
-	printk(KERN_INFO "TSSEL : %d\n", 0x01 & (readl(ts_base+S3C_ADCCON)>>17));
-
 	return 0;
 
 fail:
 	free_irq(ts_irq->start, ts->dev);
 	free_irq(ts_irq->end, ts->dev);
+
+err_chain:
+	ts_filter_chain_destroy(ts->chain);
 
 err_irq:
 	input_free_device(input_dev);
@@ -545,6 +547,8 @@ static int s3c_ts_remove(struct platform_device *dev)
 	input_unregister_device(ts->dev);
 	iounmap(ts_base);
 
+	ts_filter_chain_destroy(ts->chain);
+
 	return 0;
 }
 
@@ -573,6 +577,8 @@ static int s3c_ts_resume(struct platform_device *pdev)
 	writel(adctsc, ts_base+S3C_ADCTSC);
 	writel(adcdly, ts_base+S3C_ADCDLY);
 	writel(WAIT4INT(0), ts_base+S3C_ADCTSC);
+
+	ts_filter_chain_clear(ts->chain);
 
 	enable_irq(IRQ_ADC);
 	enable_irq(IRQ_PENDN);
@@ -630,3 +636,4 @@ module_exit(s3c_ts_exit);
 MODULE_AUTHOR("Samsung AP");
 MODULE_DESCRIPTION("S5P touchscreen driver");
 MODULE_LICENSE("GPL");
+
